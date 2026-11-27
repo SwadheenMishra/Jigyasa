@@ -1,0 +1,53 @@
+{
+  "idk_triggers": [
+    "pata nahi", "pata nahin", "pata nai", "pata nhi", "nahi pata", "nahin pata", "nhi pata", "nai pata",
+    "malum nahi", "maloom nahi", "nahi malum", "nahi maloom", "yaad nahi", "nahi yaad",
+    "i dont know", "dont know", "i do not know", "no idea", "not sure", "idk",
+    "पता नहीं", "नहीं पता", "पता नई", "मालूम नहीं", "नहीं मालूम", "याद नहीं",
+    "ਪਤਾ ਨਹੀਂ", "ਨਹੀਂ ਪਤਾ", "தெரியாது", "தெரியலை", "জানি না", "জানিনা", "माहित नाही", "माहीत नाही"
+  ],
+  "causal_words": [
+    "kyunki", "kyuki", "kyonki", "kyoki", "kyun ki", "isliye", "isiliye", "islie", "is liye", "taaki", "tabhi",
+    "because", "so", "therefore", "since", "that is why", "thats why", "due to",
+    "क्योंकि", "क्यूंकि", "क्योकि", "इसलिए", "इसीलिए", "ताकि", "तभी"
+  ],
+  "negations": [
+    "nahi", "nahin", "nai", "nhi", "not", "no", "never", "doesnt", "dont", "isnt", "cannot", "cant",
+    "नहीं", "नही"
+  ],
+
+  "lines": {
+    "noise": {"hi": "Bahut shor hai, thoda paas aakar bolo na?", "en": "It's very noisy. Can you come closer and say it again?",
+              "dev": "बहुत शोर है, थोड़ा पास आकर बोलो ना?"},
+    "explain_nudge": {"hi": "Jo bhi pata hai, woh batao! Thoda sa bhi chalega.", "en": "Tell me whatever you know! Even a little bit is fine.",
+                      "dev": "जो भी पता है, वो बताओ! थोड़ा सा भी चलेगा."},
+    "move_on": {"hi": "Koi baat nahi! Agla sawaal.", "en": "No problem! Next question.", "dev": "कोई बात नहीं! अगला सवाल."},
+    "done": {"hi": "Wah, maza aa gaya! Ruko, sochne do...", "en": "That was fun! Wait, let me think...",
+             "dev": "वाह, मज़ा आ गया! रुको, सोचने दो."},
+    "ack": [
+      {"hi": "Achha!", "en": "Okay!", "dev": "अच्छा!"},
+      {"hi": "Hmm, interesting!", "en": "Hmm, interesting!", "dev": "हम्म, इंटरेस्टिंग!"},
+      {"hi": "Oho!", "en": "Oh!", "dev": "ओहो!"},
+      {"hi": "Sach mein?", "en": "Really?", "dev": "सच में?"}
+    ],
+    "strength": {"hi": "Tumne {x} achhe se samjhaya.", "en": "You explained {x} really well.", "dev": "तुमने {x} अच्छे से समझाया."},
+    "strength_reasoning": {"hi": "Tumne apne reasons achhe se diye.", "en": "You gave good reasons for your answers.",
+                           "dev": "तुमने अपने रीज़न्स अच्छे से दिए."},
+    "strength_none": {"hi": "Tumne himmat se samjhane ki koshish ki.", "en": "You bravely tried to explain.",
+                      "dev": "तुमने हिम्मत से समझाने की कोशिश की."},
+    "misconception": {"hi": "Ek baat yaad rakhna: {x}", "en": "One thing to remember: {x}", "dev": "एक बात याद रखना. {x}"},
+    "missing": {"hi": "Agli baar {x} ke baare mein bhi sochna.", "en": "Next time, also think about {x}.",
+                "dev": "अगली बार {x} के बारे में भी सोचना."},
+    "all_good": {"hi": "Tumne saari main baatein cover kar li!", "en": "You covered all the main ideas!",
+                 "dev": "तुमने सारी मेन बातें कवर कर लीं!"},
+    "joiner": {"hi": " aur ", "en": " and ", "dev": " और "},
+    "encourage": {
+      "high": {"hi": "Tum toh teacher ban sakte ho, shabaash!", "en": "You could be a teacher, well done!",
+               "dev": "तुम तो टीचर बन सकते हो, शाबाश!"},
+      "mid": {"hi": "Bahut badhiya! Ek baar aur samjhao, aur pakka ho jayega.", "en": "Great job! Explain once more and it will stick.",
+              "dev": "बहुत बढ़िया! एक बार और समझाओ, और पक्का हो जाएगा."},
+      "low": {"hi": "Koi baat nahi, seekhna aise hi hota hai. Phir se try karein?", "en": "That's okay, this is how learning works. Shall we try again?",
+              "dev": "कोई बात नहीं, सीखना ऐसे ही होता है. फिर से ट्राई करें?"}
+    }
+  }
+}

@@ -1,0 +1,31 @@
+# Secrets — never commit keys
+.env
+.env.*
+!.env.example
+
+# Data (SQLite lives inside the container)
+*.db
+*.db-journal
+*.sqlite3
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Private project notes for Claude Code (personal schedule etc.) — never commit
+CLAUDE.md
+CLAUDE.local.md
+.claude/

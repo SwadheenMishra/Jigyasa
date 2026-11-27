@@ -1,0 +1,198 @@
+{
+  "id": "photosynthesis",
+  "order": 2,
+  "title": "Photosynthesis",
+  "title_hi": "प्रकाश संश्लेषण",
+  "class": 7,
+  "subject": "Science",
+  "emoji": "🌱",
+
+  "_note": "Every line has hi (Hinglish, Roman script, shown on screen), en (English) and dev (the same Hinglish line in Devanagari, spoken by a Hindi TTS voice, which reads Roman Hindi badly).",
+
+  "topic_keywords": [
+    "photosynthesis", "photo synthesis", "plants make food", "plant food",
+    "paudhe khana", "paudhe ka khana", "ped khana",
+    "प्रकाश संश्लेषण", "फोटोसिंथेसिस", "फोटो सिंथेसिस", "पौधे * खाना", "पौधों * भोजन"
+  ],
+  "ignore_phrases": ["प्रकाश संश्लेषण", "प्रकाश-संश्लेषण"],
+
+  "opening": {
+    "hi": "Wah! Mujhe photosynthesis samjhao na, mujhe kuch nahi pata!",
+    "en": "Wow! Please explain photosynthesis to me, I know nothing about it!",
+    "dev": "वाह! मुझे फोटोसिंथेसिस समझाओ ना, मुझे कुछ नहीं पता!"
+  },
+  "redirect": {
+    "hi": "Haha, par photosynthesis mein hota kya hai?",
+    "en": "Haha, but what actually happens in photosynthesis?",
+    "dev": "हाहा, पर फोटोसिंथेसिस में होता क्या है?"
+  },
+
+  "related_words": [
+    "plant", "plants", "paudha", "paudhe", "ped", "tree", "trees", "soil", "mitti", "gamla", "gamle",
+    "night", "raat", "din", "day", "energy", "urja", "minerals", "grow", "badhta", "stem", "tana",
+    "पौधा", "पौधे", "पेड़", "मिट्टी", "गमला", "गमले", "रात", "दिन", "ऊर्जा", "बढ़ता", "तना"
+  ],
+
+  "concepts": [
+    {
+      "id": "sunlight",
+      "name": {"hi": "Dhoop (sunlight)", "en": "Sunlight", "dev": "धूप"},
+      "keywords": [
+        "sunlight", "sun", "light", "dhoop", "dhup", "roshni", "prakash", "suraj", "sooraj",
+        "धूप", "सूरज", "रोशनी", "प्रकाश", "सनलाइट", "लाइट"
+      ],
+      "question": {"hi": "Yeh sab raat ko bhi hota hai kya?", "en": "Does all this happen at night too?",
+                   "dev": "ये सब रात को भी होता है क्या?"},
+      "probe": {"hi": "Tumne '{word}' bola. Uske bina kya hoga?", "en": "You said '{word}'. What happens without it?",
+                "dev": "तुमने {word} बोला. उसके बिना क्या होगा?"},
+      "hint": {"hi": "Socho, plant ko din mein upar se kya milta hai jo raat ko nahi?",
+               "en": "Think: what does a plant get from above by day, but not at night?",
+               "dev": "सोचो, पौधे को दिन में ऊपर से क्या मिलता है जो रात को नहीं?"}
+    },
+    {
+      "id": "chlorophyll",
+      "name": {"hi": "Chlorophyll (hare patte)", "en": "Chlorophyll (green leaves)", "dev": "क्लोरोफिल, यानी हरे पत्ते"},
+      "keywords": [
+        "chlorophyll", "green", "leaf", "leaves", "hara", "hare", "hari", "patta", "patte", "patti", "pattiyan",
+        "पत्ती", "पत्ते", "पत्तियां", "पत्तियों", "हरा", "हरे", "हरी", "क्लोरोफिल", "पर्णहरित", "ग्रीन", "लीफ"
+      ],
+      "question": {"hi": "Patte hare hi kyun hote hain? Koi reason hai kya?", "en": "Why are leaves green? Is there a reason?",
+                   "dev": "पत्ते हरे ही क्यों होते हैं? कोई रीज़न है क्या?"},
+      "probe": {"hi": "Tumne '{word}' bola. Patton ka isme kya kaam hai?", "en": "You said '{word}'. What job do leaves do here?",
+                "dev": "तुमने {word} बोला. पत्तों का इसमें क्या काम है?"},
+      "hint": {"hi": "Patte ke andar kuch hara hota hai. Woh dhoop ke saath kya karta hoga?",
+               "en": "Leaves have something green inside. What might it do with sunlight?",
+               "dev": "पत्ते के अंदर कुछ हरा होता है. वो धूप के साथ क्या करता होगा?"}
+    },
+    {
+      "id": "carbon_dioxide",
+      "name": {"hi": "Hawa se carbon dioxide", "en": "Carbon dioxide from air", "dev": "हवा से कार्बन डाइऑक्साइड"},
+      "keywords": [
+        "carbon dioxide", "co2", "air", "hawa", "hava",
+        "कार्बन डाइऑक्साइड", "कार्बन डाई ऑक्साइड", "कार्बनडाइऑक्साइड", "हवा"
+      ],
+      "question": {"hi": "Plant khana banane ke liye hawa se kuch leta hai kya?", "en": "Does the plant take anything from the air to make food?",
+                   "dev": "पौधा खाना बनाने के लिए हवा से कुछ लेता है क्या?"},
+      "probe": {"hi": "Tumne '{word}' bola. Hawa se plant ko kya milta hai?", "en": "You said '{word}'. What does the plant get from air?",
+                "dev": "तुमने {word} बोला. हवा से पौधे को क्या मिलता है?"},
+      "hint": {"hi": "Hum saans mein jo gas bahar chhodte hain, woh plant ke kaam aati hai.",
+               "en": "The gas we breathe out is useful to plants.",
+               "dev": "हम सांस में जो गैस बाहर छोड़ते हैं, वो पौधे के काम आती है."}
+    },
+    {
+      "id": "water",
+      "name": {"hi": "Jad se paani", "en": "Water from roots", "dev": "जड़ से पानी"},
+      "keywords": [
+        "water", "roots", "root", "paani", "pani", "jad", "jadh", "jaden", "jadein",
+        "पानी", "जड़", "जड़ें", "जड"
+      ],
+      "question": {"hi": "Aur paani? Paani ka kya kaam hai isme?", "en": "And water? What does water do in this?",
+                   "dev": "और पानी? पानी का इसमें क्या काम है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Paani kahan se kahan jaata hai?", "en": "You said '{word}'. Where does the water travel?",
+                "dev": "तुमने {word} बोला. पानी कहाँ से कहाँ जाता है?"},
+      "hint": {"hi": "Plant ko roz paani kyun dete hain? Woh paani kahan jaata hai?",
+               "en": "Why do we water plants daily? Where does that water go?",
+               "dev": "पौधे को रोज़ पानी क्यों देते हैं? वो पानी कहाँ जाता है?"}
+    },
+    {
+      "id": "glucose",
+      "name": {"hi": "Glucose (khana) banana", "en": "Makes glucose (food)", "dev": "ग्लूकोज़, यानी खाना बनाना"},
+      "keywords": [
+        "glucose", "sugar", "starch", "food", "khana", "khaana", "bhojan",
+        "ग्लूकोज", "भोजन", "खाना", "शुगर", "स्टार्च", "चीनी"
+      ],
+      "question": {"hi": "Toh last mein plant banata kya hai?", "en": "So what does the plant make in the end?",
+                   "dev": "तो लास्ट में पौधा बनाता क्या है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Plant usse kya karta hai?", "en": "You said '{word}'. What does the plant do with it?",
+                "dev": "तुमने {word} बोला. पौधा उससे क्या करता है?"},
+      "hint": {"hi": "Plant yeh sab cheezein mila ke apne liye kuch banata hai. Kya?",
+               "en": "The plant mixes these things to make something for itself. What?",
+               "dev": "पौधा ये सब चीज़ें मिला के अपने लिए कुछ बनाता है. क्या?"}
+    },
+    {
+      "id": "oxygen",
+      "name": {"hi": "Oxygen chhodna", "en": "Releases oxygen", "dev": "ऑक्सीजन छोड़ना"},
+      "keywords": ["oxygen", "o2", "ऑक्सीजन", "आक्सीजन", "ऑक्सिजन"],
+      "question": {"hi": "Aur khana banne ke baad plant bahar kya chhodta hai?", "en": "And after making food, what does the plant give out?",
+                   "dev": "और खाना बनने के बाद पौधा बाहर क्या छोड़ता है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Woh kiske kaam aati hai?", "en": "You said '{word}'. Who uses it?",
+                "dev": "तुमने {word} बोला. वो किसके काम आती है?"},
+      "hint": {"hi": "Jo gas hum saans mein lete hain, woh kahan se aati hogi?",
+               "en": "The gas we breathe in, where might it come from?",
+               "dev": "जो गैस हम सांस में लेते हैं, वो कहाँ से आती होगी?"}
+    }
+  ],
+
+  "misconceptions": [
+    {
+      "id": "food_from_soil",
+      "name": {"hi": "Plant mitti se khana leta hai", "en": "Plants get food from soil", "dev": "पौधा मिट्टी से खाना लेता है"},
+      "triggers": [
+        "mitti * khana", "mitti * khaana", "mitti * bhojan", "mitti * food", "mitti * khata", "mitti * khate",
+        "soil * food", "soil * khana", "food * soil", "eat * soil", "eats * soil",
+        "मिट्टी * खाना", "मिट्टी * भोजन", "मिट्टी * खाता", "मिट्टी * खाते"
+      ],
+      "question": {"hi": "Mitti se khana? Toh gamle ki mitti kam kyun nahi hoti?", "en": "Food from soil? Then why doesn't the soil in the pot get less?",
+                   "dev": "मिट्टी से खाना? तो गमले की मिट्टी कम क्यों नहीं होती?"},
+      "hint": {"hi": "Socho, chhota paudha bada ped ban jaata hai. Itna wazan kahan se aaya?",
+               "en": "Think: a tiny plant becomes a big tree. Where did all that weight come from?",
+               "dev": "सोचो, छोटा पौधा बड़ा पेड़ बन जाता है. इतना वज़न कहाँ से आया?"},
+      "correct_idea": {
+        "hi": "Plant apna khana khud banata hai hawa, paani aur dhoop se; mitti sirf paani aur minerals deti hai.",
+        "en": "Plants make their own food from air, water and sunlight; soil only gives water and minerals.",
+        "dev": "पौधा अपना खाना खुद बनाता है हवा, पानी और धूप से. मिट्टी सिर्फ़ पानी और मिनरल्स देती है."
+      }
+    },
+    {
+      "id": "sunlight_is_food",
+      "name": {"hi": "Dhoop hi khana hai", "en": "Sunlight is the food", "dev": "धूप ही खाना है"},
+      "triggers": [
+        "dhoop khata", "dhoop khate", "dhoop hi khana", "dhoop * khana hai", "eats sunlight", "eat sunlight",
+        "sun is food", "sun is its food", "sunlight is food", "sunlight is the food", "sunlight is its food",
+        "धूप खाता", "धूप खाते", "धूप ही खाना", "धूप * खाना है"
+      ],
+      "question": {"hi": "Agar dhoop hi khana hai, toh paani aur hawa kyun chahiye?", "en": "If sunlight is the food, why does it need water and air?",
+                   "dev": "अगर धूप ही खाना है, तो पानी और हवा क्यों चाहिए?"},
+      "hint": {"hi": "Dhoop ek tarah ki energy hai. Energy se kuch banaya jaata hai.",
+               "en": "Sunlight is a kind of energy. Energy is used to make something.",
+               "dev": "धूप एक तरह की एनर्जी है. एनर्जी से कुछ बनाया जाता है."},
+      "correct_idea": {
+        "hi": "Dhoop khana nahi, energy hai; plant us energy se paani aur CO2 ko glucose mein badalta hai.",
+        "en": "Sunlight is energy, not food; the plant uses it to turn water and CO2 into glucose.",
+        "dev": "धूप खाना नहीं, एनर्जी है. पौधा उस एनर्जी से पानी और कार्बन डाइऑक्साइड को ग्लूकोज़ में बदलता है."
+      }
+    },
+    {
+      "id": "photosynthesis_is_breathing",
+      "name": {"hi": "Photosynthesis matlab saans lena", "en": "Photosynthesis is breathing", "dev": "फोटोसिंथेसिस मतलब सांस लेना"},
+      "triggers": [
+        "photosynthesis * saans", "saans * photosynthesis", "plant * saans", "paudhe * saans", "paudha * saans",
+        "plants breathe", "plant breathes", "plant * breathe", "breathing process", "photosynthesis is breathing",
+        "पौधे * सांस", "पौधा * सांस", "फोटोसिंथेसिस * सांस", "पौधे * साँस"
+      ],
+      "question": {"hi": "Toh kya plant raat ko bhi saans leta hai? Tab dhoop nahi hoti na?", "en": "So does the plant breathe at night too? There's no sunlight then!",
+                   "dev": "तो क्या पौधा रात को भी सांस लेता है? तब धूप नहीं होती ना?"},
+      "hint": {"hi": "Saans din-raat chalti hai. Photosynthesis ko kya chahiye jo sirf din mein milta hai?",
+               "en": "Breathing goes on day and night. What does photosynthesis need that only comes by day?",
+               "dev": "सांस दिन-रात चलती है. फोटोसिंथेसिस को क्या चाहिए जो सिर्फ़ दिन में मिलता है?"},
+      "correct_idea": {
+        "hi": "Photosynthesis khana banana hai, saans lena nahi; saans din-raat chalti hai, photosynthesis sirf dhoop mein.",
+        "en": "Photosynthesis is making food, not breathing; breathing goes on all day and night, photosynthesis needs light.",
+        "dev": "फोटोसिंथेसिस खाना बनाना है, सांस लेना नहीं. सांस दिन-रात चलती है, फोटोसिंथेसिस सिर्फ़ धूप में."
+      }
+    }
+  ],
+
+  "vocab_fixes": {
+    "clorofil": "chlorophyll", "chlorofil": "chlorophyll", "clorophyll": "chlorophyll", "chlorophil": "chlorophyll",
+    "chloro phil": "chlorophyll", "chloro fill": "chlorophyll", "chlorophyl": "chlorophyll",
+    "photo sin thesis": "photosynthesis", "photo synthesis": "photosynthesis", "foto synthesis": "photosynthesis",
+    "photosynthesys": "photosynthesis", "fotosynthesis": "photosynthesis", "photosinthesis": "photosynthesis",
+    "glucos": "glucose", "gloucose": "glucose", "glukose": "glucose",
+    "carbon di oxide": "carbon dioxide", "carbon die oxide": "carbon dioxide", "carbon dioxyde": "carbon dioxide",
+    "carbondioxide": "carbon dioxide", "co 2": "co2", "c o 2": "co2",
+    "oxigen": "oxygen", "auxygen": "oxygen", "oxyzen": "oxygen", "aksijan": "oxygen", "oksijan": "oxygen",
+    "sun light": "sunlight", "sanlight": "sunlight",
+    "क्लोरोफिल्ल": "क्लोरोफिल", "फोटो सिंथेसिस": "फोटोसिंथेसिस", "ऑक्सीज़न": "ऑक्सीजन", "ऑक्सिजन": "ऑक्सीजन"
+  }
+}

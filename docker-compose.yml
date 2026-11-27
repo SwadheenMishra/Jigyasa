@@ -1,0 +1,20 @@
+services:
+  jigyasa:
+    build: .
+    ports:
+      - "3000:3000"
+    # .env is optional: the app starts with no file and no keys (offline brain).
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - jigyasa-data:/srv/data   # SQLite file (transcripts + scores only)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  jigyasa-data:
