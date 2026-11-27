@@ -26,11 +26,16 @@ _STRIP = re.compile(r"[^a-z0-9\sऀ-෿]")
 _SPACES = re.compile(r"\s+")
 _LATIN = re.compile(r"[a-z0-9]")
 _GAP = r"(?:\s+\S+){0,3}\s+"
+# Fractions: "1/8" (or "1 / 8") becomes "1 by 8" so it survives punctuation stripping;
+# spoken forms ("ek bata aath", "one by eight") are mapped to the same shape by vocab_fixes.
+_FRACTION = re.compile(r"(\d)\s*/\s*(\d)")
+_DEV_DIGITS = str.maketrans("०१२३४५६७८९", "0123456789")
 
 
 def normalize(text: str | None, fixes: dict[str, str] | None = None) -> str:
     """Lower-case, unify Unicode, drop punctuation, then apply vocabulary fixes."""
-    t = unicodedata.normalize("NFC", text or "").lower()
+    t = unicodedata.normalize("NFC", text or "").lower().translate(_DEV_DIGITS)
+    t = _FRACTION.sub(r"\1 by \2", t)
     t = t.replace("'", "").replace("’", "")  # "don't" -> "dont"
     t = t.replace("।", " ").replace("॥", " ")  # Devanagari full stops
     t = _SPACES.sub(" ", _STRIP.sub(" ", t)).strip()

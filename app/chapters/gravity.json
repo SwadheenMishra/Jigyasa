@@ -1,0 +1,210 @@
+{
+  "id": "gravity",
+  "order": 3,
+  "title": "Gravity",
+  "title_hi": "गुरुत्वाकर्षण",
+  "class": 9,
+  "subject": "Science",
+  "emoji": "🍎",
+
+  "_note": "Lines: hi = Hinglish (Roman, shown), en = English, dev = Hinglish in Devanagari (spoken).",
+
+  "topic_keywords": [
+    "gravity", "gravitation", "gravitational", "gurutvakarshan", "gurutva akarshan", "gurutvakarshan bal",
+    "गुरुत्वाकर्षण", "गुरुत्व", "ग्रेविटी", "ग्रैविटी", "ग्रेविटेशन"
+  ],
+
+  "opening": {
+    "hi": "Wah, gravity! Mujhe samjhao na, cheezein neeche hi kyun girti hain?",
+    "en": "Wow, gravity! Please explain it. Why do things always fall down?",
+    "dev": "वाह, ग्रेविटी! मुझे समझाओ ना, चीज़ें नीचे ही क्यों गिरती हैं?"
+  },
+  "redirect": {
+    "hi": "Haha, par gravity karti kya hai?",
+    "en": "Haha, but what does gravity actually do?",
+    "dev": "हाहा, पर ग्रेविटी करती क्या है?"
+  },
+
+  "related_words": [
+    "fall", "falls", "falling", "girta", "girti", "girna", "gire", "upar", "neeche", "niche", "drop", "ball", "apple", "seb",
+    "tree", "ped", "throw", "phenko", "speed", "fast", "slow", "jaldi", "space", "antariksh", "astronaut", "float", "air", "hawa",
+    "गिरता", "गिरती", "गिरना", "ऊपर", "नीचे", "सेब", "पेड़", "अंतरिक्ष", "स्पेस", "हवा", "जल्दी", "तेज़"
+  ],
+
+  "concepts": [
+    {
+      "id": "attractive_force",
+      "name": {"hi": "Kheenchne wala bal (force)", "en": "An attractive force (pull)", "dev": "खींचने वाला बल"},
+      "keywords": [
+        "force", "pull", "pulls", "pulling", "attract", "attracts", "attraction", "bal", "kheenchta", "kheenchti", "kheechta",
+        "kheechti", "khinchta", "khinchti", "kheench", "aakarshan", "akarshan",
+        "बल", "आकर्षण", "खींचता", "खींचती", "खींच", "फोर्स", "पुल"
+      ],
+      "question": {"hi": "Gravity dhakka deti hai ya kheenchti hai?", "en": "Does gravity push things or pull them?",
+                   "dev": "ग्रेविटी धक्का देती है या खींचती है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Yeh kheenchav kahan se aata hai?", "en": "You said '{word}'. Where does that pull come from?",
+                "dev": "तुमने {word} बोला. ये खिंचाव कहाँ से आता है?"},
+      "hint": {"hi": "Ball upar phenko. Woh wapas kyun aa jaati hai?", "en": "Throw a ball up. Why does it come back?",
+               "dev": "बॉल ऊपर फेंको. वो वापस क्यों आ जाती है?"}
+    },
+    {
+      "id": "earth_pulls",
+      "name": {"hi": "Dharti sab ko apni taraf kheenchti hai", "en": "Earth pulls everything towards it",
+               "dev": "धरती सबको अपनी तरफ़ खींचती है"},
+      "keywords": [
+        "earth", "prithvi", "dharti", "zameen", "jameen", "ground", "centre", "center", "kendra",
+        "पृथ्वी", "धरती", "ज़मीन", "जमीन", "अर्थ", "केंद्र"
+      ],
+      "question": {"hi": "Sab cheezein neeche hi kyun girti hain, upar kyun nahi?", "en": "Why do things fall down, and never up?",
+                   "dev": "सब चीज़ें नीचे ही क्यों गिरती हैं, ऊपर क्यों नहीं?"},
+      "probe": {"hi": "Tumne '{word}' bola. Dharti ka isme kya role hai?", "en": "You said '{word}'. What is Earth's role here?",
+                "dev": "तुमने {word} बोला. धरती का इसमें क्या रोल है?"},
+      "hint": {"hi": "Hum sab kis badi cheez ke upar khade hain?", "en": "What huge thing are we all standing on?",
+               "dev": "हम सब किस बड़ी चीज़ के ऊपर खड़े हैं?"}
+    },
+    {
+      "id": "mass",
+      "name": {"hi": "Mass par depend karti hai", "en": "Depends on mass", "dev": "मास पर डिपेंड करती है"},
+      "keywords": [
+        "mass", "masses", "dravyaman", "massive", "heavy planet", "bada planet", "bigger planet",
+        "द्रव्यमान", "मास", "मात्रा"
+      ],
+      "question": {"hi": "Kya bade planet ki gravity zyada hoti hai? Kyun?", "en": "Does a bigger planet have stronger gravity? Why?",
+                   "dev": "क्या बड़े प्लैनेट की ग्रेविटी ज़्यादा होती है? क्यों?"},
+      "probe": {"hi": "Tumne '{word}' bola. Mass badhe toh gravity ka kya hoga?", "en": "You said '{word}'. If mass grows, what happens to gravity?",
+                "dev": "तुमने {word} बोला. मास बढ़े तो ग्रेविटी का क्या होगा?"},
+      "hint": {"hi": "Chand chhota hai, Jupiter bahut bada. Kaun zyada kheenchega?", "en": "The Moon is small, Jupiter is huge. Which pulls harder?",
+               "dev": "चाँद छोटा है, जुपिटर बहुत बड़ा. कौन ज़्यादा खींचेगा?"}
+    },
+    {
+      "id": "distance",
+      "name": {"hi": "Doori badhne par kam hoti hai", "en": "Gets weaker with distance", "dev": "दूरी बढ़ने पर कम होती है"},
+      "keywords": [
+        "distance", "doori", "duri", "door", "dur", "far", "farther", "near", "paas", "square",
+        "दूरी", "दूर", "पास", "डिस्टेंस", "वर्ग"
+      ],
+      "question": {"hi": "Dharti se bahut door jaane par gravity ka kya hota hai?", "en": "What happens to gravity far away from Earth?",
+                   "dev": "धरती से बहुत दूर जाने पर ग्रेविटी का क्या होता है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Doori double ho toh kheenchav kitna?", "en": "You said '{word}'. If distance doubles, how strong is the pull?",
+                "dev": "तुमने {word} बोला. दूरी डबल हो तो खिंचाव कितना?"},
+      "hint": {"hi": "Magnet ko door le jao toh kya hota hai? Gravity bhi socho.", "en": "Move a magnet away: what happens? Think of gravity too.",
+               "dev": "मैग्नेट को दूर ले जाओ तो क्या होता है? ग्रेविटी भी सोचो."}
+    },
+    {
+      "id": "universal",
+      "name": {"hi": "Har cheez har cheez ko kheenchti hai", "en": "Every object pulls every other object",
+               "dev": "हर चीज़ हर चीज़ को खींचती है"},
+      "keywords": [
+        "universal", "everything", "every object", "every body", "har cheez", "har vastu", "sab cheezein", "sabhi",
+        "moon", "chand", "chaand", "chanda", "sun", "suraj", "planet", "planets", "grah", "orbit", "newton",
+        "सार्वत्रिक", "हर चीज़", "हर वस्तु", "चाँद", "चांद", "चंद्रमा", "सूरज", "ग्रह", "कक्षा", "ऑर्बिट", "न्यूटन"
+      ],
+      "question": {"hi": "Kya chand aur dharti ke beech bhi gravity hai?", "en": "Is there gravity between the Moon and Earth too?",
+                   "dev": "क्या चाँद और धरती के बीच भी ग्रेविटी है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Kya do pencil bhi ek doosre ko kheenchti hain?", "en": "You said '{word}'. Do two pencils pull each other too?",
+                "dev": "तुमने {word} बोला. क्या दो पेंसिल भी एक दूसरे को खींचती हैं?"},
+      "hint": {"hi": "Chand dharti ke chakkar kyun lagata rehta hai, bhaag kyun nahi jaata?", "en": "Why does the Moon keep circling Earth instead of flying away?",
+               "dev": "चाँद धरती के चक्कर क्यों लगाता रहता है, भाग क्यों नहीं जाता?"}
+    },
+    {
+      "id": "weight",
+      "name": {"hi": "Wazan = gravity ka kheenchav", "en": "Weight is gravity's pull", "dev": "वज़न, यानी ग्रेविटी का खिंचाव"},
+      "keywords": [
+        "weight", "wazan", "vajan", "wajan", "bhaar", "9 8", "9 point 8", "acceleration", "tvaran", "mg",
+        "वज़न", "वजन", "भार", "त्वरण", "एक्सीलरेशन"
+      ],
+      "question": {"hi": "Hamara wazan gravity se kaise juda hai?", "en": "How is our weight connected to gravity?",
+                   "dev": "हमारा वज़न ग्रेविटी से कैसे जुड़ा है?"},
+      "probe": {"hi": "Tumne '{word}' bola. Chand par wazan kam kyun hota hai?", "en": "You said '{word}'. Why do we weigh less on the Moon?",
+                "dev": "तुमने {word} बोला. चाँद पर वज़न कम क्यों होता है?"},
+      "hint": {"hi": "Chand par tum oonchi chhalaang laga sakte ho. Aisa kyun?", "en": "On the Moon you can jump really high. Why?",
+               "dev": "चाँद पर तुम ऊँची छलांग लगा सकते हो. ऐसा क्यों?"}
+    }
+  ],
+
+  "misconceptions": [
+    {
+      "id": "heavier_falls_faster",
+      "name": {"hi": "Bhari cheez jaldi girti hai", "en": "Heavier things fall faster", "dev": "भारी चीज़ जल्दी गिरती है"},
+      "triggers": [
+        "bhari * jaldi", "bhaari * jaldi", "bhari * pehle", "bhaari * pehle", "bhari * tez", "bhaari * tez",
+        "heavy * faster", "heavier * faster", "heavy * first", "heavier * first", "heavy * quickly", "heavier * quicker",
+        "zyada wazan * jaldi", "wazan zyada * jaldi",
+        "भारी * जल्दी", "भारी * पहले", "भारी * तेज़", "भारी * तेज"
+      ],
+      "exceptions": [
+        "same", "saath", "ek saath", "barabar", "equal", "utni hi", "utna hi", "together", "bhi utni",
+        "एक साथ", "साथ", "बराबर", "उतनी ही", "उतना ही"
+      ],
+      "question": {"hi": "Bhari pehle giregi? Toh kitaab aur uspe rakha kagaz saath kyun girte?",
+                   "en": "Heavy falls first? Then why do a book and paper on it fall together?",
+                   "dev": "भारी पहले गिरेगी? तो किताब और उसपे रखा कागज़ साथ क्यों गिरते?"},
+      "hint": {"hi": "Kagaz ko gola bana ke giraao. Ab kya farak pada?", "en": "Crumple the paper into a ball and drop it. What changed?",
+               "dev": "कागज़ को गोला बना के गिराओ. अब क्या फ़र्क पड़ा?"},
+      "correct_idea": {
+        "hi": "Hawa na ho toh har cheez ek hi speed se girti hai; farak sirf hawa ki rukawat se padta hai.",
+        "en": "Without air, everything falls at the same rate; only air resistance makes a difference.",
+        "dev": "हवा ना हो तो हर चीज़ एक ही स्पीड से गिरती है. फ़र्क सिर्फ़ हवा की रुकावट से पड़ता है."
+      }
+    },
+    {
+      "id": "no_gravity_in_space",
+      "name": {"hi": "Space ya chand par gravity nahi hoti", "en": "No gravity in space or on the Moon",
+               "dev": "स्पेस या चाँद पर ग्रेविटी नहीं होती"},
+      "negation_is_part_of_it": true,
+      "triggers": [
+        "space * gravity nahi", "space * gravity nahin", "antariksh * gravity nahi", "chand * gravity nahi", "chaand * gravity nahi",
+        "moon * gravity nahi", "no gravity in space", "no gravity on the moon", "no gravity on moon", "zero gravity",
+        "there is no gravity", "gravity nahi hoti", "gravity nahi hai",
+        "space * no gravity", "moon * no gravity",
+        "अंतरिक्ष * गुरुत्वाकर्षण नहीं", "स्पेस * ग्रेविटी नहीं", "चाँद * ग्रेविटी नहीं", "चांद * ग्रेविटी नहीं",
+        "चांद * गुरुत्वाकर्षण नहीं", "ग्रेविटी नहीं होती", "गुरुत्वाकर्षण नहीं होता"
+      ],
+      "exceptions": [
+        "bhi hoti", "bhi hai", "kam hoti", "kam hai", "feel", "lagta", "lagti", "lagte", "aisa nahi", "galat", "myth", "wrong",
+        "भी होती", "भी है", "कम होती", "कम है", "लगता", "लगती", "ऐसा नहीं", "गलत"
+      ],
+      "question": {"hi": "Space mein gravity nahi? Toh chand dharti ke chakkar kyun lagata hai?",
+                   "en": "No gravity in space? Then why does the Moon keep circling Earth?",
+                   "dev": "स्पेस में ग्रेविटी नहीं? तो चाँद धरती के चक्कर क्यों लगाता है?"},
+      "hint": {"hi": "Koi rassi chand ko pakde nahi hai. Phir bhi woh door kyun nahi jaata?",
+               "en": "No rope holds the Moon. So why doesn't it drift away?",
+               "dev": "कोई रस्सी चाँद को पकड़े नहीं है. फिर भी वो दूर क्यों नहीं जाता?"},
+      "correct_idea": {
+        "hi": "Gravity space aur chand par bhi hoti hai; isi se chand dharti ke chakkar lagata hai.",
+        "en": "Gravity exists in space and on the Moon too; it is what keeps the Moon circling Earth.",
+        "dev": "ग्रेविटी स्पेस और चाँद पर भी होती है. इसी से चाँद धरती के चक्कर लगाता है."
+      }
+    },
+    {
+      "id": "only_falling_things",
+      "name": {"hi": "Gravity sirf girti cheezon par lagti hai", "en": "Gravity only acts on falling things",
+               "dev": "ग्रेविटी सिर्फ़ गिरती चीज़ों पर लगती है"},
+      "triggers": [
+        "sirf * girti", "sirf * girte", "sirf * girne", "sirf * gire", "only * falling", "only * falls", "only * fall",
+        "only when * falls", "only when * falling", "jab gire tabhi", "jab girti hai tabhi",
+        "सिर्फ़ * गिरती", "सिर्फ * गिरती", "सिर्फ़ * गिरने", "सिर्फ * गिरने", "सिर्फ़ * गिरते", "जब गिरे तभी"
+      ],
+      "question": {"hi": "Sirf girti cheez par? Toh mez par rakhi kitaab ko kaun daba raha hai?",
+                   "en": "Only on falling things? Then what presses a book down on the table?",
+                   "dev": "सिर्फ़ गिरती चीज़ पर? तो मेज़ पर रखी किताब को कौन दबा रहा है?"},
+      "hint": {"hi": "Mez hata do toh kitaab ka kya hoga? Toh kheenchav pehle se tha?",
+               "en": "Pull the table away: what happens to the book? Was the pull already there?",
+               "dev": "मेज़ हटा दो तो किताब का क्या होगा? तो खिंचाव पहले से था?"},
+      "correct_idea": {
+        "hi": "Gravity har cheez par hamesha lagti hai, rakhi hui kitaab par bhi; isi se uska wazan hota hai.",
+        "en": "Gravity always acts on everything, even a book resting on a table; that pull is its weight.",
+        "dev": "ग्रेविटी हर चीज़ पर हमेशा लगती है, रखी हुई किताब पर भी. इसी से उसका वज़न होता है."
+      }
+    }
+  ],
+
+  "vocab_fixes": {
+    "gravitee": "gravity", "graviti": "gravity", "grevity": "gravity", "gravitty": "gravity", "gravty": "gravity",
+    "gravitesion": "gravitation", "gravitashan": "gravitation",
+    "gurutva akarshan": "gurutvakarshan", "guruthvakarshan": "gurutvakarshan", "gurutwakarshan": "gurutvakarshan",
+    "newtan": "newton", "nuton": "newton", "accelaration": "acceleration", "acceleretion": "acceleration",
+    "9 point 8": "9 8", "nine point eight": "9 8",
+    "ग्रैविटी": "ग्रेविटी", "ग्रेविटि": "ग्रेविटी", "ग्रविटी": "ग्रेविटी", "गुरुत्व आकर्षण": "गुरुत्वाकर्षण", "चन्द्रमा": "चंद्रमा"
+  }
+}

@@ -47,7 +47,14 @@ class OfflineBrain(Brain):
 
         misconceptions = []
         for m in chapter["misconceptions"]:
-            hit = find_unnegated(text, m["triggers"], negations)
+            # Some misconceptions are themselves negative ("space mein gravity nahi hai"),
+            # so a chapter can switch the negation filter off for them.
+            hit = (find_phrase(text, m["triggers"]) if m.get("negation_is_part_of_it")
+                   else find_unnegated(text, m["triggers"], negations))
+            # "exceptions": words near the match that flip its meaning, e.g.
+            # "bhari cheez bhi ek saath girti hai" is the correct idea, not the misconception.
+            if hit and contains_any(snippet(text, hit[1], 4), m.get("exceptions", [])):
+                hit = None
             if hit:
                 misconceptions.append({"item": m, "said": snippet(text, hit[1])})
 

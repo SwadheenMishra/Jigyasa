@@ -229,6 +229,13 @@
     $("score").textContent = r.score;
     $("score-ring").style.setProperty("--pct", r.score);
     $("feedback").textContent = r.feedback_in_student_language;
+    const parts = r.breakdown || {};
+    $("breakdown").hidden = !r.breakdown;
+    for (const bar of $("breakdown").querySelectorAll(".bar")) {
+      const v = Math.max(0, Math.min(100, Number(parts[bar.dataset.key]) || 0));
+      bar.querySelector("i").style.width = `${v}%`;
+      bar.querySelector("b").textContent = v;
+    }
     fillList($("covered"), r.concepts_covered);
     fillList($("missing"), r.concepts_missing);
 
