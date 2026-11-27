@@ -14,13 +14,11 @@ from __future__ import annotations
 
 import re
 
-from app.brain.base import Brain
+from app.brain.base import (MISCONCEPTION_PENALTY, QUESTIONS_PER_SESSION, Brain, combine_score,
+                             reasoning_quality)
 from app.brain.text import contains_any, find_phrase, find_unnegated, snippet
 from app.content import chapter_text, common, join_lines, line, pick
 
-MISCONCEPTION_PENALTY = 30
-WEIGHTS = {"correctness": 0.4, "reasoning": 0.3, "coverage": 0.3}
-QUESTIONS_PER_SESSION = 3
 _DEVANAGARI = re.compile(r"[ऀ-ॿ]")
 
 
@@ -120,12 +118,8 @@ class OfflineBrain(Brain):
         correctness = max(0, 100 - MISCONCEPTION_PENALTY * len(a["misconceptions"]))
         reasoning = self._reasoning(chapter, session)
         coverage = round(100 * len(covered) / len(concepts)) if concepts else 0
-        score = round(
-            WEIGHTS["correctness"] * correctness
-            + WEIGHTS["reasoning"] * reasoning
-            + WEIGHTS["coverage"] * coverage
-        )
-        quality = "high" if reasoning >= 67 else "medium" if reasoning >= 34 else "low"
+        score = combine_score(correctness, reasoning, coverage)
+        quality = reasoning_quality(reasoning)
 
         names = lambda items: [pick(i["name"], lang) for i in items]  # noqa: E731
         joiner = line(lines["joiner"], lang)

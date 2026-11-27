@@ -176,13 +176,32 @@
   }
 
   /** Which voice and text to use for a line, for the student's language. */
+  // Script of the spoken text -> voice locales to try, best first. Only hand a voice
+  // text in its own script: Roman Hindi through a Hindi voice sounds garbled.
+  const SCRIPTS = [
+    { re: /[਀-੿]/, langs: ["pa-IN"] }, // Gurmukhi (Punjabi)
+    { re: /[஀-௿]/, langs: ["ta-IN"] }, // Tamil
+    { re: /[ঀ-৿]/, langs: ["bn-IN", "bn-BD"] }, // Bengali
+    { re: /[ऀ-ॿ]/, langs: ["hi-IN"] }, // Devanagari (Hindi, Hinglish, Marathi)
+  ];
+
   function chooseSpeech(line, language) {
-    // Only hand Devanagari to the Hindi voice; Roman Hindi through it sounds garbled.
-    if (language !== "en" && /[ऀ-ॿ]/.test(line.speak || "")) {
-      const hindi = bestVoice("hi-IN");
-      if (hindi) return { text: line.speak, voice: hindi, lang: hindi.lang };
+    const speak = line.speak || "";
+    if (language !== "en") {
+      for (const s of SCRIPTS) {
+        if (!s.re.test(speak)) continue;
+        // Marathi is Devanagari too: prefer a Marathi voice, else a Hindi voice reads it acceptably.
+        const langs = s.langs[0] === "hi-IN" && language === "mr" ? ["mr-IN", "hi-IN"] : s.langs;
+        for (const l of langs) {
+          const v = bestVoice(l);
+          if (v) return { text: speak, voice: v, lang: v.lang };
+        }
+        break;
+      }
     }
-    // English, or no Hindi voice on this device: speak the Roman text in Indian English.
+    // English, or no matching voice on this device: speak the Roman text in Indian English.
+    // If the on-screen text has no Roman letters (e.g. Tamil only), stay silent rather than garble it.
+    if (!/[a-z]/i.test(line.text || "")) return { text: "", voice: null, lang: "en-IN" };
     const english = bestVoice("en-IN") || bestVoice("en-GB") || bestVoice("en-US");
     return { text: line.text, voice: english, lang: english ? english.lang : "en-IN" };
   }

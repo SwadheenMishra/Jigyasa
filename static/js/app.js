@@ -210,6 +210,7 @@
       bubble(ui("thinking"));
       const endpoint = stage === "explain" ? "explain" : "answer";
       const reply = await api(`/api/session/${state.sessionId}/${endpoint}`, turn);
+      setBadge(reply.brain);
 
       if (reply.question) {
         $("step-label").textContent = `Sawaal ${reply.q_number}/${reply.q_total} · Question`;
@@ -225,6 +226,7 @@
 
   async function showResults() {
     const r = await api(`/api/session/${state.sessionId}/finish`, {});
+    setBadge(r.brain);
     show("results");
     $("score").textContent = r.score;
     $("score-ring").style.setProperty("--pct", r.score);
@@ -329,10 +331,16 @@
     }
   }
 
-  function setBadge(brain) {
+  function setBadge(brain, why) {
+    if (!brain) return;
     const b = $("brain-badge");
     b.textContent = brain === "llm" ? "AI brain" : "Offline brain";
     b.className = `badge ${brain}`;
+    b.title = brain === "llm"
+      ? "AI brain (Google Gemini). Falls back to the offline brain automatically."
+      : `Offline brain: rule-based, works without internet or API keys.${why ? ` (AI brain off: ${why})` : ""}`;
+    // Be honest about where text goes: with the AI brain, transcripts go to Google.
+    $("privacy-ai").hidden = brain !== "llm";
   }
 
   async function init() {
@@ -357,7 +365,7 @@
 
     try {
       const [health, data] = await Promise.all([api("/api/health"), api("/api/chapters")]);
-      setBadge(health.brain);
+      setBadge(health.brain, health.llm_error);
       state.languages = data.languages;
       state.chapters = data.chapters;
       if (!state.languages.some((l) => l.id === state.language)) state.language = data.default_language;

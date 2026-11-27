@@ -19,6 +19,22 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+# Scoring weights (CLAUDE.md §4), shared so both brains turn their findings
+# into a number the same way.
+MISCONCEPTION_PENALTY = 30
+WEIGHTS = {"correctness": 0.4, "reasoning": 0.3, "coverage": 0.3}
+QUESTIONS_PER_SESSION = 3
+
+
+def combine_score(correctness: int, reasoning: int, coverage: int) -> int:
+    return round(WEIGHTS["correctness"] * correctness
+                 + WEIGHTS["reasoning"] * reasoning
+                 + WEIGHTS["coverage"] * coverage)
+
+
+def reasoning_quality(reasoning: int) -> str:
+    return "high" if reasoning >= 67 else "medium" if reasoning >= 34 else "low"
+
 
 class Brain(ABC):
     name: str = "base"

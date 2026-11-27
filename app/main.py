@@ -7,6 +7,7 @@ offline (rule-based) brain.
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -15,11 +16,12 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app import db, session as engine
-from app.brain import get_brain
+from app.brain import get_brain, llm_configured
 from app.content import (DEFAULT_LANGUAGE, LANGUAGES, get_chapter, load_chapters,
                          match_topic, public_chapter)
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s: %(message)s")
 
 
 @asynccontextmanager
@@ -29,7 +31,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Jigyasa", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Jigyasa", version="0.4.0", lifespan=lifespan)
 
 
 # ---------- request bodies ----------
@@ -55,7 +57,11 @@ class MatchBody(BaseModel):
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "brain": get_brain().name}
+    # brain: what answers right now ("offline" also during the cooldown after an LLM failure).
+    # llm_configured: whether a key is set at all. The key itself is never exposed.
+    brain = get_brain()
+    return {"status": "ok", "brain": brain.name, "llm_configured": llm_configured(),
+            "llm_error": getattr(brain, "llm_error", None)}
 
 
 @app.get("/api/chapters")
@@ -101,7 +107,7 @@ def finish(session_id: str) -> dict:
     except engine.SessionError as e:
         raise HTTPException(409, str(e)) from e
     db.save_session(state)
-    return result
+    return {**result, "brain": state.get("last_brain") or get_brain().name}
 
 
 @app.get("/api/session/{session_id}")
@@ -114,11 +120,13 @@ def get_session(session_id: str) -> dict:
 def _turn(session_id: str, body: TurnBody, handler) -> dict:
     state = _session(session_id)
     try:
-        reply = handler(state, _chapter(state["chapter_id"]), body.transcript, body.reason, get_brain())
+        brain = get_brain()
+        reply = handler(state, _chapter(state["chapter_id"]), body.transcript, body.reason, brain)
     except engine.SessionError as e:
         raise HTTPException(409, str(e)) from e
     db.save_session(state)
-    return reply
+    # Which brain produced this turn (for the badge); turns that needed no brain keep the last one.
+    return {**reply, "brain": state.get("last_brain") or brain.name}
 
 
 def _chapter(chapter_id: str) -> dict:

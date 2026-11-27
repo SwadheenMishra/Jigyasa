@@ -25,7 +25,7 @@ def start(client, language="hinglish"):
 
 def test_health_offline_without_key():
     with TestClient(app) as c:
-        assert c.get("/api/health").json() == {"status": "ok", "brain": "offline"}
+        assert c.get("/api/health").json() == {"status": "ok", "brain": "offline", "llm_configured": False, "llm_error": None}
 
 
 def test_index_served():
