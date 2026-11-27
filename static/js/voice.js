@@ -25,7 +25,9 @@
    * Listen for one turn. Resolves {transcript, reason, heard}:
    *   reason "pause"   — speech, then `silenceMs` of quiet (end of turn)
    *   reason "silence" — nothing at all for `noSpeechMs`
-   *   reason "noise"   — sound detected but nothing recognised by `noSpeechMs`
+   *   reason "noise"   — the recogniser returned results it could not turn into words
+   *                      (Chrome's speechstart event alone is NOT used: it fires for fans,
+   *                      traffic and breathing, which made plain silence look like noise)
    *   reason "timeout" — `maxMs` reached
    *   reason "done"    — finish() called (the "Done" button)
    * Rejects with VoiceError on fatal errors (network, mic blocked...).
@@ -36,7 +38,7 @@
     let interim = "";
     let active = true;
     let heard = false; // got words
-    let sound = false; // browser detected speech-like sound
+    let unclear = false; // recogniser heard something but produced no words
     let rec = null;
     let resolveFn, rejectFn;
     const timers = {};
@@ -52,7 +54,7 @@
       clearTimers();
       stopRec();
       const transcript = text();
-      if (reason === "silence" && sound && !transcript) reason = "noise";
+      if (reason === "silence" && unclear && !transcript) reason = "noise";
       resolveFn({ transcript, reason, heard });
     }
 
@@ -75,8 +77,9 @@
       rec.continuous = true;
       rec.interimResults = true;
 
-      rec.onspeechstart = () => { sound = true; };
+      rec.onnomatch = () => { unclear = true; };
       rec.onresult = (e) => {
+        if (!e.results.length || !e.results[e.results.length - 1][0].transcript.trim()) unclear = true;
         let now = "";
         for (let i = e.resultIndex; i < e.results.length; i++) {
           const r = e.results[i];
