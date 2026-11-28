@@ -53,7 +53,8 @@ def _ids(chapter: dict, result: dict, field: str) -> list[str]:
     if f"{field}_ids" in result:
         return list(result[f"{field}_ids"])
     names = set(result.get(f"concepts_{field}", []))
-    return [c["id"] for c in chapter["concepts"] if names & {pick(c["name"], "hi"), pick(c["name"], "en")}]
+    return [c["id"] for c in chapter["concepts"]
+            if names & {pick(c["name"], lang) for lang in ("hinglish", "en", "hi")}]
 
 
 def _finished_at(s: dict) -> str:
@@ -93,14 +94,14 @@ def dashboard(code: str) -> dict:
         names = {m["id"]: m["name"] for m in ch["misconceptions"]}
         misconceptions = sorted(
             ({"id": mid, "name_en": pick(names[mid], "en") if mid in names else OTHER["en"],
-              "name_hi": pick(names[mid], "hi") if mid in names else OTHER["hi"],
+              "name_hi": pick(names[mid], "hinglish") if mid in names else OTHER["hi"],
               "count": c, "percent": round(100 * c / n)} for mid, c in mis_count.items()),
             key=lambda m: (-m["count"], m["id"] == "other", m["id"]),
         )
         concept_names = {c["id"]: c["name"] for c in ch["concepts"]}
         reteach = sorted(
             ({"chapter_id": ch["id"], "chapter": ch["title"], "emoji": ch["emoji"], "id": cid,
-              "name_en": pick(concept_names[cid], "en"), "name_hi": pick(concept_names[cid], "hi"),
+              "name_en": pick(concept_names[cid], "en"), "name_hi": pick(concept_names[cid], "hinglish"),
               "count": c, "percent": round(100 * c / n)} for cid, c in miss_count.items() if cid in concept_names),
             key=lambda r: (-r["count"], r["id"]),
         )

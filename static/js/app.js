@@ -29,6 +29,8 @@
 
   // hi = Roman Hinglish (shown), dev = same line in Devanagari (spoken by a Hindi voice).
   const UI = {
+    hello: { hi: "Namaste! Main Kyun-Kyun hoon. Mujhe kuch sikhaoge?", en: "Hello! I'm Kyun-Kyun. Will you teach me something?",
+             dev: "नमस्ते! मैं क्यूं-क्यूं हूँ. मुझे कुछ सिखाओगे?" },
     askTopic: { hi: "Bolo, kya samjhana hai?", en: "Tell me, what will you explain?", dev: "बोलो, क्या समझाना है?" },
     noTopic: { hi: "Yeh chapter abhi mujhe nahi aata. Neeche se chuno na!", en: "I don't know that chapter yet. Pick one below!",
                dev: "ये चैप्टर अभी मुझे नहीं आता. नीचे से चुनो ना!" },
@@ -78,8 +80,9 @@
   function savePref(key, v) { try { localStorage.setItem(key, v); } catch (_) { /* private mode */ } }
   function dropPref(key) { try { localStorage.removeItem(key); } catch (_) { /* private mode */ } }
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const lineKey = () => (state.language === "en" ? "en" : "hi");
-  const ui = (name) => UI[name][lineKey()];
+  // hi = Roman Hinglish, en = English, dev = Devanagari (shown for the हिंदी chip)
+  const lineKey = () => ({ en: "en", hi: "dev" })[state.language] || "hi";
+  const ui = (name) => UI[name][lineKey()] || UI[name].hi;
   /** A UI line as {text, speak} for kkSay. */
   const uiLine = (name) => ({ text: ui(name), speak: state.language === "en" ? ui(name) : UI[name].dev });
   const recLang = () => (state.languages.find((l) => l.id === state.language) || { rec: "hi-IN" }).rec;
@@ -606,6 +609,7 @@
         state.language = l.id;
         savePref("jigyasa.language", l.id);
         renderLanguages();
+        if (!state.busy && document.body.dataset.screen !== "talk") bubble(ui("hello"));
       });
       box.append(b);
     }
@@ -706,6 +710,7 @@
       if (!state.languages.some((l) => l.id === state.language)) state.language = data.default_language;
       renderLanguages();
       renderChapters();
+      bubble(ui("hello")); // greet in the saved language
       await offerResume();
     } catch (err) {
       console.error(err);

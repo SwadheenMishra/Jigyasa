@@ -126,3 +126,18 @@ def test_quote_falls_back_to_marked_excerpt_without_punctuation():
             "plant mitti se khana leta hai aur patte hare hote hain aur dhoop mein plant badhta hai")
     said = _said("photosynthesis", long)
     assert said.startswith("…") and said.endswith("…") and "mitti se khana" in said
+
+
+def test_hindi_chip_shows_devanagari_and_hinglish_stays_roman():
+    from app.content import common, line
+    noise = common()["lines"]["noise"]
+    assert line(noise, "hi")["text"] == noise["dev"]
+    assert line(noise, "hinglish")["text"] == noise["hi"]
+    assert line(noise, "en")["text"] == noise["en"]
+
+
+def test_dashboard_matches_devanagari_concept_names():
+    from app.classes import _ids
+    ch = CHAPTERS["photosynthesis"]
+    first = ch["concepts"][0]
+    assert _ids(ch, {"concepts_missing": [first["name"]["dev"]]}, "missing") == [first["id"]]

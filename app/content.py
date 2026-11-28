@@ -47,12 +47,13 @@ def public_chapter(ch: dict) -> dict:
 
 
 def line_key(language: str) -> str:
-    """Offline content is written in Hinglish ("hi") and English ("en").
+    """Which form of a line to show: "hi" = Roman Hinglish, "en" = English, "dev" = Devanagari Hindi.
 
-    Other languages fall back to Hinglish for now; the LLM brain (milestone 4)
-    can reply in the student's own language. Listed as a roadmap item.
+    The हिंदी chip shows the Devanagari form. Other languages fall back to
+    Hinglish for now; the LLM brain can reply in the student's own language.
+    Listed as a roadmap item.
     """
-    return "en" if language == "en" else "hi"
+    return {"en": "en", "hi": "dev"}.get(language, "hi")
 
 
 def pick(text_obj, language: str) -> str:
