@@ -399,7 +399,7 @@ body.teacher h3 { font-size: 1rem; margin: 16px 0 6px; }
 .teacher-badge::before { display: none; }
 .muted { color: var(--muted); }
 .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 14px 0; }
-.panels.two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.panels.two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
 .panel { background: var(--paper); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
 .panels .panel { margin-bottom: 0; }
 .stack { display: flex; flex-direction: column; gap: 8px; }
@@ -458,6 +458,55 @@ dialog#detail::backdrop { background: rgba(43, 45, 66, .45); }
 .detail-score { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 10px 0; }
 blockquote { margin: 0; padding: 10px 12px; background: var(--paper); border-left: 5px solid var(--sky); border-radius: 8px; }
 ol.qa { padding-left: 20px; display: grid; gap: 8px; }
+
+/* ---------- laptops & desktops ---------- */
+/* With a mouse (or enough room) nobody scrolls sideways: wrap the language chips instead. */
+@media (min-width: 600px), (hover: hover) and (pointer: fine) {
+  .chips {
+    flex-wrap: wrap; justify-content: center; overflow: visible;
+    -webkit-mask-image: none; mask-image: none;
+  }
+}
+
+/* Two columns on wide screens (student app only — the teacher dashboard has its own wide layout):
+   Kyun-Kyun stays big on the left, the current screen on the right. */
+@media (min-width: 900px) {
+  body:not(.teacher) .topbar { max-width: 1060px; padding-top: 18px; }
+  body:not(.teacher) main {
+    max-width: 1060px; display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+    column-gap: 36px; align-items: start;
+  }
+  body:not(.teacher) main > .notice,
+  body:not(.teacher) main > .demo-banner,
+  body:not(.teacher) main > .privacy { grid-column: 1 / -1; }
+  main > .stage { grid-column: 1; position: sticky; top: 18px; margin-top: 6px; padding: 26px 20px 24px; }
+  main > .screen { grid-column: 2; padding-top: 6px; }
+  .stage .kk svg { width: 190px; height: 190px; }
+  .stage .halo { width: 230px; height: 230px; top: 14px; }
+  .bubble { font-size: 1.2rem; }
+
+  /* the compact session layout is for phones; on a laptop Kyun-Kyun keeps the left column */
+  body[data-screen="talk"] .stage, body[data-screen="results"] .stage {
+    flex-direction: column; padding: 26px 20px 24px; margin-bottom: 0;
+  }
+  body[data-screen="talk"] .kk svg, body[data-screen="results"] .kk svg { width: 150px; height: 150px; }
+  body[data-screen="talk"] .halo, body[data-screen="results"] .halo { width: 190px; height: 190px; top: 14px; left: auto; }
+  body[data-screen="talk"] .bubble, body[data-screen="results"] .bubble {
+    font-size: 1.1rem; text-align: center; justify-content: center; padding: 14px 18px;
+  }
+  body[data-screen="talk"] .bubble::before, body[data-screen="results"] .bubble::before {
+    top: -9px; left: 50%; transform: translateX(-50%) rotate(45deg); border-radius: 4px 0 0 0;
+  }
+
+  .tagline { text-align: left; margin-top: 4px; }
+  .block, .mic-zone { margin-top: 22px; }
+  .cards { grid-template-columns: repeat(3, 1fr); }
+  .card { grid-template-columns: 1fr; justify-items: start; gap: 4px; padding: 14px; border-left: 0; border-top: 6px solid var(--c); }
+  .card .emoji { grid-row: auto; margin-bottom: 4px; }
+  .card::after { display: none; }
+  .question { font-size: 1.35rem; }
+  .transcript { min-height: 120px; }
+}
 
 /* ---------- small screens & motion ---------- */
 @media (max-width: 380px) {

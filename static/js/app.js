@@ -43,6 +43,7 @@
                      dev: "चलो, वहीं से शुरू करते हैं. समझाओ ना!" },
     demoDone: { hi: "Demo khatam! Ab tumhari baari — koi bhi chapter chuno.", en: "Demo done! Your turn now — pick any chapter.",
                 dev: "डेमो खत्म! अब तुम्हारी बारी, कोई भी चैप्टर चुनो." },
+    studentTest: { hi: "Aur main demo wala student hoon!", en: "And I'm the demo student!", dev: "और मैं डेमो वाला स्टूडेंट हूँ!" },
     voiceTest: { hi: "Namaste! Main Kyun-Kyun hoon. Kya meri awaaz saaf sunai de rahi hai?",
                  en: "Hello! I am Kyun-Kyun. Can you hear me clearly?",
                  dev: "नमस्ते! मैं क्यूं-क्यूं हूँ. क्या मेरी आवाज़ साफ़ सुनाई दे रही है?" },
@@ -681,8 +682,11 @@
     $("btn-voice-test").addEventListener("click", async () => {
       if (state.busy) return;
       await V.voicesReady();
-      $("voice-name").textContent = V.canSpeak ? `Voice: ${V.voiceName(state.language)}` : "No speech voice in this browser";
+      $("voice-name").textContent = V.canSpeak
+        ? `Kyun-Kyun: ${V.voiceName(state.language)} · Demo student: ${V.voiceName("hinglish", true)}`
+        : "No speech voice in this browser";
       await kkSay(uiLine("voiceTest"), "happy");
+      await V.speakLine({ text: UI.studentTest.hi, speak: UI.studentTest.dev }, "hinglish", { student: true });
       setMood("curious");
     });
     $("btn-home").addEventListener("click", () => {

@@ -165,17 +165,29 @@
     return score;
   }
 
-  /** Best voice for a locale; with `avoid`, the best *other* voice (for the demo student). */
-  function bestVoice(lang, avoid = null) {
+  // Voice names hint at gender on Microsoft / Apple devices (Google voices don't say).
+  const MALE = /\b(male|hemant|madhur|prabhat|ravi|rishi|aarav|kunal|arjun|david|mark|daniel|alex|fred)\b/i;
+  const FEMALE = /\b(female|swara|kalpana|lekha|heera|neerja|veena|zira|samantha|karen|moira|tessa)\b/i;
+
+  /**
+   * Best voice for a locale. `avoid` skips a voice (Kyun-Kyun's), and
+   * `preferMale` favours a contrasting voice for the Demo-mode student.
+   */
+  function bestVoice(lang, avoid = null, preferMale = false) {
     let best = null;
     let bestScore = -1;
     for (const v of voices) {
       if (avoid && v.name === avoid.name) continue;
-      const s = rankVoice(v, lang);
+      let s = rankVoice(v, lang);
+      if (s < 0) continue;
+      if (preferMale) s += MALE.test(v.name) ? 25 : FEMALE.test(v.name) ? -15 : 0;
       if (s > bestScore) { best = v; bestScore = s; }
     }
     return best;
   }
+
+  /** Google's online voices take a raised pitch well; built-in Apple/Microsoft voices sound strained. */
+  const kkPitch = (voice) => (voice && /google/i.test(voice.name) ? KK_PITCH : 1.06);
 
   /** Which voice and text to use for a line, for the student's language. */
   // Script of the spoken text -> voice locales to try, best first. Only hand a voice
@@ -189,10 +201,19 @@
 
   function chooseSpeech(line, language, student = false) {
     if (student) {
-      // Demo student: a different voice from Kyun-Kyun's when the device has one.
+      // Demo student: must sound like a different person from Kyun-Kyun.
       const kk = chooseSpeech(line, language);
-      const other = kk.voice ? bestVoice(kk.lang, kk.voice) : null;
-      return { ...kk, voice: other && rankVoice(other, kk.lang) >= 100 ? other : kk.voice };
+      // 1. another voice in the same language (Chrome/Edge often have several Hindi voices)
+      const same = kk.voice ? bestVoice(kk.lang, kk.voice, true) : null;
+      if (same && rankVoice(same, kk.lang) >= 100) return { ...kk, voice: same, distinct: true };
+      // 2. Safari usually has a single Hindi voice (Lekha): use an Indian-English voice
+      //    (e.g. Rishi) reading the Roman line instead — clearly a different speaker.
+      if (/[a-z]/i.test(line.text || "")) {
+        const en = bestVoice("en-IN", kk.voice, true) || bestVoice("en-GB", kk.voice, true) || bestVoice("en-US", kk.voice, true);
+        if (en) return { text: line.text, voice: en, lang: en.lang, distinct: true };
+      }
+      // 3. only one voice on the device: same voice, clearly lower pitch (set in speakLine)
+      return { ...kk, distinct: false };
     }
     const speak = line.speak || "";
     if (language !== "en") {
@@ -254,8 +275,9 @@
     const token = ++speakToken;
     speechSynthesis.cancel();
     await voicesReady();
-    const { text, voice, lang } = chooseSpeech(line, language, student);
-    const [pitch, rate] = student ? [0.9, 1.05] : [KK_PITCH, KK_RATE];
+    const { text, voice, lang, distinct } = chooseSpeech(line, language, student);
+    // Student: natural pitch with its own voice; if the device has only one voice, go clearly lower.
+    const [pitch, rate] = student ? [distinct ? 1.0 : 0.8, 1.02] : [kkPitch(voice), KK_RATE];
     await new Promise((r) => setTimeout(r, 60)); // Chrome drops an utterance queued right after cancel()
     for (const sentence of splitSentences(text)) {
       if (token !== speakToken) return; // interrupted
@@ -269,9 +291,11 @@
   }
 
   /** For the "test voice" button: which voice will be used for this language. */
-  function voiceName(language = "hinglish") {
-    const { voice } = chooseSpeech({ text: "x", speak: "x" }, language);
-    return voice ? `${voice.name} (${voice.lang})` : "default voice";
+  /** For the "test voice" button: which voice Kyun-Kyun (or the demo student) will use. */
+  function voiceName(language = "hinglish", student = false) {
+    const { voice, distinct } = chooseSpeech({ text: "Namaste", speak: "नमस्ते" }, language, student);
+    const name = voice ? `${voice.name} (${voice.lang})` : "default voice";
+    return student && !distinct ? `${name}, lower pitch (only one voice on this device)` : name;
   }
 
   window.JVoice = {
