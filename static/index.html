@@ -90,28 +90,32 @@
         </div>
       </div>
 
-      <p class="tagline">You can copy an answer. You can't copy understanding.</p>
-
-      <button id="btn-demo" class="demo-strip" type="button">
-        <span class="play" aria-hidden="true">▶</span>
-        <span><b>Demo dekho · Watch a 90-second demo</b><small>no mic or key needed</small></span>
-      </button>
-
-      <div class="block">
-        <h2 class="label">Bhasha chuno · Pick your language</h2>
-        <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
-      </div>
-
-      <div class="mic-zone">
-        <button id="btn-topic" class="mic" type="button" aria-label="Tap and say the topic">
-          <svg width="56" height="56" aria-hidden="true"><use href="#i-mic"/></svg>
+      <div class="hero">
+        <p class="eyebrow">🎙️ Bolo · Samjhao · Seekho</p>
+        <h1 class="headline">You can copy an answer.<br><mark>You can't copy understanding.</mark></h1>
+        <p class="lede">Explain a chapter out loud to Kyun-Kyun. It keeps asking <b>“kyun?”</b> until it's clear you really get it.</p>
+        <button id="btn-demo" class="demo-strip" type="button">
+          <span class="play" aria-hidden="true">▶</span>
+          <span><b>Demo dekho · Watch a 90-second demo</b><small>no mic or key needed</small></span>
         </button>
-        <p class="mic-label">Tap karke topic bolo · Tap &amp; say the topic
-          <small>“Photosynthesis samjhana hai”</small></p>
+      </div>
+
+      <div class="start-card">
+        <h2 class="step"><span class="num">1</span> Bhasha chuno · Pick your language</h2>
+        <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
+
+        <h2 class="step"><span class="num">2</span> Topic bolo · Say the topic</h2>
+        <div class="mic-zone">
+          <button id="btn-topic" class="mic" type="button" aria-label="Tap and say the topic">
+            <svg width="56" height="56" aria-hidden="true"><use href="#i-mic"/></svg>
+          </button>
+          <p class="mic-label">Tap karke bolo · Tap, then speak
+            <small>“Photosynthesis samjhana hai”</small></p>
+        </div>
       </div>
 
       <div class="block">
-        <h2 class="label">Ya chapter chuno · Or pick a chapter</h2>
+        <h2 class="label"><span>Ya chapter chuno · Or pick a chapter</span></h2>
         <div id="chapter-cards" class="cards"></div>
       </div>
 
@@ -147,13 +151,14 @@
       </div>
       <div id="question-card" class="question" hidden></div>
 
-      <div id="mic-state" class="listen">
-        <div class="orb" aria-hidden="true"><svg width="40" height="40"><use href="#i-mic"/></svg></div>
-        <p class="listen-on">Sun raha hoon… bolo! · Listening — speak!</p>
-        <p class="listen-off">Kyun-Kyun bol raha hai… · Kyun-Kyun is talking…</p>
+      <div class="talk-card">
+        <div id="mic-state" class="listen">
+          <div class="orb" aria-hidden="true"><svg width="40" height="40"><use href="#i-mic"/></svg></div>
+          <p class="listen-on">Sun raha hoon… bolo! · Listening — speak!</p>
+          <p class="listen-off">Kyun-Kyun bol raha hai… · Kyun-Kyun is talking…</p>        </div>
+        <div id="transcript" class="transcript" aria-live="polite"></div>
+        <button id="btn-done" class="btn primary go" type="button">✋ Ho gaya · Done</button>
       </div>
-      <div id="transcript" class="transcript" aria-live="polite"></div>
-      <button id="btn-done" class="btn primary" type="button">✋ Ho gaya · Done</button>
 
       <!-- Accessibility: typing is for students who can't speak (speech disability),
            and opens by itself when the device can't use the microphone. -->
@@ -174,11 +179,13 @@
     <!-- RESULTS -->
     <section id="screen-results" class="screen" hidden>
       <div class="result-card">
-        <div class="score-wrap">
-          <div id="celebrate" class="celebrate" hidden aria-hidden="true"><span>🎉</span><span>⭐</span><span>✨</span><span>🌟</span><span>🎊</span></div>
-          <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
+        <div class="score-col">
+          <div class="score-wrap">
+            <div id="celebrate" class="celebrate" hidden aria-hidden="true"><span>🎉</span><span>⭐</span><span>✨</span><span>🌟</span><span>🎊</span></div>
+            <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
+          </div>
+          <p class="score-label">Samajh score · Understanding score</p>
         </div>
-        <p class="score-label">Samajh score · Understanding score</p>
         <div id="breakdown" class="breakdown">
           <div class="bar" data-key="correctness"><span>Sahi samajh · Correct ideas <small>40%</small></span><div class="track"><i></i></div><b></b></div>
           <div class="bar" data-key="reasoning"><span>Kyun ka jawab · Reasoning <small>30%</small></span><div class="track"><i></i></div><b></b></div>
