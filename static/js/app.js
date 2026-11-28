@@ -216,8 +216,9 @@
   // ---------- typing: an accessibility option, not the main input ----------
 
   /**
-   * Show or hide the text box. It is for students with a speech disability,
-   * and opens by itself when the device can't use the microphone.
+   * Show or hide the text box. Voice-first, never voice-only: it is for non-speaking
+   * students or anyone with a speech difficulty, and opens by itself when the device
+   * can't use the microphone.
    */
   function openTyping(open = true, focus = false) {
     $("text-form").hidden = !open;

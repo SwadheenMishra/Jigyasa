@@ -160,15 +160,15 @@
         <button id="btn-done" class="btn primary go" type="button">✋ Ho gaya · Done</button>
       </div>
 
-      <!-- Accessibility: typing is for students who can't speak (speech disability),
-           and opens by itself when the device can't use the microphone. -->
+      <!-- Accessibility: voice-first, never voice-only. Typing is for non-speaking students or
+           anyone with a speech difficulty, and opens by itself when the device can't use the mic. -->
       <button id="btn-type" class="type-toggle" type="button" aria-expanded="false" aria-controls="text-form">
         <svg width="20" height="20" aria-hidden="true"><use href="#i-keyboard"/></svg>
-        Bol nahi sakte? Likh kar batao · Can't speak? Type instead
+        Likh kar batana hai? · I'd prefer to type
       </button>
       <form id="text-form" class="text-form" autocomplete="off" hidden>
-        <p id="type-note" class="type-note">♿ For students with a speech disability — or when the mic isn't
-          available. Jigyasa is made for speaking, so use your voice if you can.</p>
+        <p id="type-note" class="type-note">♿ For non-speaking students or anyone with a speech difficulty,
+          or when the mic isn't available. Jigyasa is voice-first, so speak if you can.</p>
         <div class="row">
           <input id="text-input" type="text" maxlength="2000" placeholder="Yahan likho… · Type here…" aria-label="Type your answer">
           <button class="btn" type="submit">Bhejo · Send</button>

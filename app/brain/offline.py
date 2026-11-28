@@ -33,6 +33,36 @@ def _spoken_word(concept: dict, word: str) -> str:
     return next((k for k in concept["keywords"] if _DEVANAGARI.search(k)), word)
 
 
+_SENTENCE = re.compile(r"(?<=[.!?।])\s+|\n+")
+QUOTE_MAX_WORDS = 20
+
+
+def _quote(chapter: dict, raw: str, item: dict, negations: list[str]) -> str | None:
+    """The student's own sentence that holds the misconception, as they said it.
+
+    Speech transcripts often have no punctuation, so a very long "sentence"
+    is skipped and the caller falls back to a short excerpt instead.
+    """
+    for sentence in _SENTENCE.split((raw or "").strip()):
+        sentence = sentence.strip()
+        if not sentence or len(sentence.split()) > QUOTE_MAX_WORDS:
+            continue
+        t = chapter_text(chapter, sentence)
+        hit = (find_phrase(t, item["triggers"]) if item.get("negation_is_part_of_it")
+               else find_unnegated(t, item["triggers"], negations))
+        if hit:
+            return sentence
+    return None
+
+
+def _excerpt(text: str, m: re.Match, words: int = 4) -> str:
+    """A few words around the match, with "…" where the student's words were cut."""
+    before = text[: m.start()].split()
+    after = text[m.end():].split()
+    out = snippet(text, m, words)
+    return f"{'…' if len(before) > words else ''}{out}{'…' if len(after) > words else ''}"
+
+
 class OfflineBrain(Brain):
     name = "offline"
 
@@ -54,7 +84,8 @@ class OfflineBrain(Brain):
             if hit and contains_any(snippet(text, hit[1], 4), m.get("exceptions", [])):
                 hit = None
             if hit:
-                misconceptions.append({"item": m, "said": snippet(text, hit[1])})
+                misconceptions.append({"item": m, "said": _quote(chapter, raw, m, negations)
+                                       or _excerpt(text, hit[1])})
 
         covered = {}
         for c in chapter["concepts"]:

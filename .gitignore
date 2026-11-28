@@ -29,3 +29,6 @@ desktop.ini
 CLAUDE.md
 CLAUDE.local.md
 .claude/
+
+# Submission drafts (video script, deck text) — kept local
+submission/

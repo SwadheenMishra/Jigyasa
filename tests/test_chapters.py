@@ -109,3 +109,20 @@ def test_full_session_each_chapter(cid, explanation, first_q_contains):
         assert result["misconceptions"] and 0 <= result["score"] <= 100
         assert set(result["breakdown"]) == {"correctness", "reasoning", "coverage"}
         assert DEV.search(result["feedback_speech"])
+
+
+def _said(cid, text):
+    return brain.analyse(CHAPTERS[cid], text)["misconceptions"][0]["said"]
+
+
+def test_quote_is_the_students_own_sentence():
+    said = _said("photosynthesis", "Photosynthesis mein plant mitti se khana leta hai. Patte hare hote hain.")
+    assert said == "Photosynthesis mein plant mitti se khana leta hai."
+
+
+def test_quote_falls_back_to_marked_excerpt_without_punctuation():
+    # Chrome often returns one long unpunctuated transcript
+    long = ("photosynthesis ek process hai jisme plant bahut saari cheezein karta hai aur "
+            "plant mitti se khana leta hai aur patte hare hote hain aur dhoop mein plant badhta hai")
+    said = _said("photosynthesis", long)
+    assert said.startswith("…") and said.endswith("…") and "mitti se khana" in said

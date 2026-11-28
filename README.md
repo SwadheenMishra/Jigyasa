@@ -166,9 +166,9 @@ the teacher link, sent as `X-Teacher-Key`; only its SHA-256 hash is stored.
 - Voices depend on the device. Chrome usually offers "Google हिन्दी"; on Windows you can also add a Hindi
   voice in *Settings → Time & language → Speech*. The 🔊 **Test voice** button shows which voice
   is used. If no suitable voice exists, text is always on screen.
-- **Voice first, inclusive by design:** Jigyasa is built to be spoken to. A clearly labelled
-  **"Can't speak? Type instead"** option is there for students with a speech disability, and it opens
-  automatically when a browser or device can't use the microphone.
+- **Voice-first, never voice-only:** Jigyasa is built to be spoken to, and voice is always the default.
+  A clearly labelled **"I'd prefer to type"** option is there for non-speaking students or anyone with a
+  speech difficulty, and it opens automatically when a browser or device can't use the microphone.
 
 ## Known limits (honest list)
 
