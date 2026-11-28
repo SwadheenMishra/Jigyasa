@@ -25,6 +25,7 @@
   const MAX_TRANSCRIPT = 5000; // server accepts 6000
   const RESUME_MAX_AGE_MS = 6 * 60 * 60 * 1000;
   const PROGRESS_KEY = "jigyasa.session";
+  const CLASS_KEY = "jigyasa.class"; // {code, className, student}: joined once, reused for every session
 
   // hi = Roman Hinglish (shown), dev = same line in Devanagari (spoken by a Hindi voice).
   const UI = {
@@ -152,6 +153,40 @@
     } catch (_) { return null; }
   }
 
+  // ---------- joining a teacher's class (optional) ----------
+
+  function joinedClass() {
+    try { return JSON.parse(loadPref(CLASS_KEY) || "null"); } catch (_) { return null; }
+  }
+
+  function renderJoin() {
+    const c = joinedClass();
+    $("joined").hidden = !c;
+    $("btn-join").hidden = !!c;
+    if (c) {
+      $("joined-class").textContent = c.className;
+      $("joined-name").textContent = c.student;
+      $("join-panel").hidden = true;
+    }
+  }
+
+  async function joinClass(e) {
+    e.preventDefault();
+    const code = $("join-code").value.trim();
+    const student = $("join-name").value.trim().replace(/\s+/g, " ").slice(0, 40);
+    const fail = (msg) => { $("join-error").textContent = msg; $("join-error").hidden = false; };
+    $("join-error").hidden = true;
+    if (!/^\d{6}$/.test(code)) return fail("Code 6 digits ka hota hai · The code has 6 digits.");
+    if (!student) return fail("Apna naam likho · Please type your first name.");
+    try {
+      const c = await api(`/api/class/${code}`, undefined, { retries: 1, timeoutMs: 10000 });
+      savePref(CLASS_KEY, JSON.stringify({ code, className: c.name, student }));
+      renderJoin();
+    } catch (err) {
+      fail(err.status === 404 ? "Yeh code nahi mila · No class with this code." : "Internet slow hai, phir se try karo · Try again.");
+    }
+  }
+
   // ---------- voice problems ----------
 
   function handleVoiceError(err) {
@@ -264,7 +299,19 @@
     V.stopSpeaking();
     $("resume-card").hidden = true;
     try {
-      const r = await api("/api/session/start", { chapter_id: chapterId, language: state.language });
+      const cls = joinedClass();
+      let r;
+      try {
+        r = await api("/api/session/start", {
+          chapter_id: chapterId, language: state.language,
+          class_code: cls ? cls.code : null, student_name: cls ? cls.student : null,
+        });
+      } catch (err) {
+        if (err.status !== 404 || !cls) throw err;
+        dropPref(CLASS_KEY); // the class no longer exists: continue solo
+        renderJoin();
+        r = await api("/api/session/start", { chapter_id: chapterId, language: state.language });
+      }
       state.sessionId = r.session_id;
       state.chapterId = chapterId;
       saveProgress();
@@ -516,6 +563,10 @@
     $("btn-done").addEventListener("click", onDone);
     $("text-form").addEventListener("submit", onTyped);
     $("btn-voice-retry").addEventListener("click", retryVoice);
+    $("btn-join").addEventListener("click", () => { $("join-panel").hidden = !$("join-panel").hidden; $("join-code").focus(); });
+    $("btn-leave").addEventListener("click", () => { dropPref(CLASS_KEY); renderJoin(); $("join-panel").hidden = false; });
+    $("join-panel").addEventListener("submit", joinClass);
+    renderJoin();
     $("btn-again").addEventListener("click", () => startChapter(state.chapterId));
     $("btn-voice-test").addEventListener("click", async () => {
       if (state.busy) return;

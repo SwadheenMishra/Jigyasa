@@ -78,8 +78,25 @@
       <h2 class="label">Ya chapter chuno · Or pick a chapter</h2>
       <div id="chapter-cards" class="cards"></div>
 
+      <!-- Optional: join a teacher's class once (6-digit code + first name). Solo use needs nothing. -->
+      <div class="join-row">
+        <span id="joined" hidden>🏫 <b id="joined-class"></b> · <span id="joined-name"></span>
+          <button id="btn-leave" class="link-btn" type="button">change</button></span>
+        <button id="btn-join" class="link-btn" type="button">🏫 Class join karo · Join a class (optional)</button>
+      </div>
+      <form id="join-panel" class="join-panel" hidden autocomplete="off">
+        <div class="row">
+          <input id="join-code" inputmode="numeric" maxlength="6" placeholder="Class code (6 digits)" aria-label="Class code">
+          <input id="join-name" maxlength="40" placeholder="Tumhara naam · First name" aria-label="First name">
+          <button class="btn primary" type="submit">Join</button>
+        </div>
+        <p class="muted-note">Only your first name and your scores are shared with your teacher.</p>
+        <p id="join-error" class="join-error" hidden></p>
+      </form>
+
       <button id="btn-voice-test" class="btn small" type="button">🔊 Awaaz suno · Test voice</button>
       <p id="voice-name" class="voice-name"></p>
+      <a class="teacher-link" href="/teacher.html">👩‍🏫 Teacher? Class dashboard →</a>
     </section>
 
     <!-- Talk: explanation, then 3 follow-up questions. -->

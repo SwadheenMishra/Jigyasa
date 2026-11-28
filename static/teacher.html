@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jigyasa — Teacher dashboard</title>
+  <meta name="description" content="See how well your class understands each chapter, and what to reteach.">
+  <meta name="theme-color" content="#fff8e7">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="teacher">
+  <header class="topbar wide">
+    <a class="brand" href="/">जिज्ञासा <small>Jigyasa</small></a>
+    <span class="badge teacher-badge">👩‍🏫 Teacher · शिक्षक</span>
+  </header>
+
+  <main class="wide">
+    <!-- 1. No class yet: create, open, or try the sample class -->
+    <section id="setup">
+      <h1>Teacher dashboard · शिक्षक डैशबोर्ड</h1>
+      <p class="muted">See who really understands each chapter, the most common wrong ideas, and what to reteach.</p>
+
+      <div class="panels">
+        <div class="panel">
+          <h2>➕ Nayi class banao · Create a class</h2>
+          <form id="create-form" class="stack">
+            <label for="class-name">Class ka naam · Class name</label>
+            <input id="class-name" maxlength="60" placeholder="e.g. Class 7B Science" autocomplete="off">
+            <button class="btn primary" type="submit">Create class</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>🔑 Apni class kholo · Open your class</h2>
+          <form id="open-form" class="stack">
+            <label for="open-link">Teacher link, ya code + key · Teacher link, or code + key</label>
+            <input id="open-link" placeholder="Paste your teacher link" autocomplete="off">
+            <div class="row">
+              <input id="open-code" inputmode="numeric" maxlength="6" placeholder="6-digit code" autocomplete="off">
+              <input id="open-key" placeholder="Teacher key" autocomplete="off">
+            </div>
+            <button class="btn" type="submit">Open dashboard</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>✨ Sample class · नमूना क्लास</h2>
+          <p>Fictional students whose sessions are scored by the real offline brain. Good for a quick look.</p>
+          <button id="btn-demo" class="btn" type="button">Load sample class</button>
+        </div>
+      </div>
+      <p id="setup-error" class="notice" hidden></p>
+    </section>
+
+    <!-- 2. Just created: show the join code and the private teacher link once -->
+    <section id="created" hidden>
+      <h1>Class ready! · क्लास तैयार!</h1>
+      <div class="panel">
+        <p>Students tap <b>🏫 Join a class</b> in Jigyasa and enter this code:</p>
+        <p id="c-code" class="code big"></p>
+        <hr>
+        <p><b>Your private teacher link</b> — save or bookmark it. It is the only way back into this dashboard.
+          <b>Don't share it with students.</b></p>
+        <div class="row">
+          <input id="c-link" readonly>
+          <button id="btn-copy-new" class="btn" type="button">Copy</button>
+        </div>
+        <button id="btn-open-new" class="btn primary" type="button">Open dashboard →</button>
+      </div>
+    </section>
+
+    <!-- 3. The dashboard -->
+    <section id="dash" hidden>
+      <div class="dash-head">
+        <div>
+          <h1 id="d-name"></h1>
+          <p class="muted">Join code <span id="d-code" class="code"></span> · students enter this in the app</p>
+        </div>
+        <div class="row">
+          <button id="btn-refresh" class="btn small-btn" type="button" title="Refresh">↻ Refresh</button>
+          <button id="btn-link" class="btn small-btn" type="button">🔗 Copy teacher link</button>
+          <button id="btn-switch" class="btn small-btn" type="button">Switch class</button>
+        </div>
+      </div>
+      <p id="demo-note" class="notice" hidden>✨ Sample data: these are fictional students, scored by Jigyasa's real offline brain.</p>
+
+      <div class="stats">
+        <div class="stat"><b id="s-students">0</b><span>Students · छात्र</span></div>
+        <div class="stat"><b id="s-sessions">0</b><span>Sessions done</span></div>
+        <div class="stat"><b id="s-average">—</b><span>Class average · औसत</span></div>
+      </div>
+
+      <div id="empty" class="panel" hidden>
+        <h2>No sessions yet · अभी कोई सेशन नहीं</h2>
+        <p>Ask students to open Jigyasa, tap <b>🏫 Join a class</b>, enter code <b class="code" id="empty-code"></b>
+          and their first name, then explain any chapter. Results appear here (refreshes every 30 s).</p>
+      </div>
+
+      <div id="dash-body">
+        <div class="panels two">
+          <div class="panel reteach">
+            <h2>📌 Kya dobara padhayein · What to reteach</h2>
+            <ol id="reteach" class="clean"></ol>
+          </div>
+          <div class="panel">
+            <h2>🤔 Galat-fehmiyan · Common misconceptions</h2>
+            <ol id="miscon" class="clean"></ol>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>📚 Chapters · अध्याय</h2>
+          <div id="chapters" class="chapter-stats"></div>
+        </div>
+
+        <div class="panel">
+          <h2>👧 Students · छात्र <small class="muted">latest score per chapter · tap a score for the transcript</small></h2>
+          <div class="table-wrap">
+            <table id="students">
+              <thead><tr id="students-head"></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p class="privacy">🔒 Only transcripts (text) and scores are stored — never audio. This page needs your teacher key.</p>
+    </section>
+
+    <!-- Session detail -->
+    <dialog id="detail">
+      <div class="detail-head">
+        <h2 id="x-title"></h2>
+        <button id="btn-close" class="btn small-btn" type="button" aria-label="Close">✕</button>
+      </div>
+      <div id="x-body"></div>
+    </dialog>
+  </main>
+
+  <script src="/js/teacher.js"></script>
+</body>
+</html>

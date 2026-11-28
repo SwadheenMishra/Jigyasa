@@ -12,7 +12,8 @@ Hint: a line dict {"text": str, "speak": str}.
 "text" is shown on screen; "speak" is fed to text-to-speech (Devanagari for
 Hinglish, because Hindi voices read Roman Hindi badly). A brain without a
 separate spoken form may set speak = text.
-Score dict: the scoring JSON in the README, plus "feedback_speech".
+Score dict: the scoring JSON in the README, plus "feedback_speech", "breakdown"
+and "covered_ids"/"missing_ids" (concept ids, used by the teacher dashboard).
 """
 
 from __future__ import annotations

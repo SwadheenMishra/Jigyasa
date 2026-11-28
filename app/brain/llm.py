@@ -283,6 +283,8 @@ Return JSON:
         return {
             "score": combine_score(correctness, reasoning, coverage),
             "concepts_covered": [line(c["name"], lang)["text"] for c in covered],
+            "covered_ids": [c["id"] for c in covered],
+            "missing_ids": [c["id"] for c in missing],
             "concepts_missing": [line(c["name"], lang)["text"] for c in missing],
             "misconceptions": miscons,
             "reasoning_quality": reasoning_quality(reasoning),

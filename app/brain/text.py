@@ -110,5 +110,13 @@ def snippet(text: str, m: re.Match, words: int = 4) -> str:
     return " ".join(before + [m.group(0)] + after)
 
 
+_BY = re.compile(r"(\d) by (\d)")
+
+
+def readable(text: str) -> str:
+    """Undo the matching-only "1 by 8" form for display: "1/8"."""
+    return _BY.sub(r"\1/\2", text)
+
+
 def word_count(text: str) -> int:
     return len(text.split())

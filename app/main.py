@@ -11,11 +11,11 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Path as PathParam
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app import db, session as engine
+from app import classes, db, session as engine
 from app.brain import get_brain, llm_configured
 from app.content import (DEFAULT_LANGUAGE, LANGUAGES, get_chapter, load_chapters,
                          match_topic, public_chapter)
@@ -31,7 +31,8 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Jigyasa", version="0.4.0", lifespan=lifespan)
+app = FastAPI(title="Jigyasa", version="0.6.0", lifespan=lifespan)
+CODE = r"^\d{6}$"  # 6-digit class join code
 
 
 # ---------- request bodies ----------
@@ -51,6 +52,10 @@ class TurnBody(BaseModel):
 
 class MatchBody(BaseModel):
     transcript: str = Field(default="", max_length=500)
+
+
+class ClassBody(BaseModel):
+    name: str = Field(default="", max_length=60)
 
 
 # ---------- routes ----------
@@ -82,8 +87,14 @@ def match(body: MatchBody) -> dict:
 def start(body: StartBody) -> dict:
     chapter = _chapter(body.chapter_id)
     language = body.language if body.language in LANGUAGES else DEFAULT_LANGUAGE
+    class_code, student_name = body.class_code or None, classes.clean_name(body.student_name) or None
+    if class_code:
+        if not db.get_class(class_code):
+            raise HTTPException(404, "Unknown class code")
+        if not student_name:
+            raise HTTPException(422, "A name is needed to join a class")
     brain = get_brain()
-    state = engine.new_session(chapter, language, brain, body.student_name, body.class_code)
+    state = engine.new_session(chapter, language, brain, student_name, class_code)
     db.save_session(state)
     return {"session_id": state["id"], "chapter": public_chapter(chapter), "brain": brain.name,
             **engine.opening(chapter, state)}
@@ -115,7 +126,59 @@ def get_session(session_id: str) -> dict:
     return _session(session_id)
 
 
+# ---------- classes & teacher dashboard ----------
+
+@app.post("/api/class")
+def create_class(body: ClassBody) -> dict:
+    """Returns the join code (for students) and the teacher key (for the dashboard; shown once)."""
+    code, key = classes.create_class(body.name)
+    return {"code": code, "teacher_key": key, "name": db.get_class(code)["name"]}
+
+
+@app.post("/api/class/demo")
+def create_demo_class() -> dict:
+    """A sample class with fictional students, scored by the real offline brain."""
+    code, key = classes.seed_demo()
+    return {"code": code, "teacher_key": key, "name": db.get_class(code)["name"], "demo": True}
+
+
+@app.get("/api/class/{code}")
+def class_info(code: str = PathParam(pattern=CODE)) -> dict:
+    """Public: lets a student check a join code. Reveals only the class name."""
+    return {"code": code, "name": _class(code)["name"]}
+
+
+@app.get("/api/class/{code}/dashboard")
+def class_dashboard(code: str = PathParam(pattern=CODE), x_teacher_key: str | None = Header(default=None)) -> dict:
+    _teacher(code, x_teacher_key)
+    return classes.dashboard(code)
+
+
+@app.get("/api/class/{code}/session/{session_id}")
+def class_session(session_id: str, code: str = PathParam(pattern=CODE),
+                  x_teacher_key: str | None = Header(default=None)) -> dict:
+    _teacher(code, x_teacher_key)
+    detail = classes.session_detail(code, session_id)
+    if not detail:
+        raise HTTPException(404, "Unknown session")
+    return detail
+
+
 # ---------- helpers ----------
+
+def _class(code: str) -> dict:
+    cls = db.get_class(code)
+    if not cls:
+        raise HTTPException(404, "Unknown class code")
+    return cls
+
+
+def _teacher(code: str, key: str | None) -> dict:
+    cls = _class(code)
+    if not classes.check_key(cls, key):
+        raise HTTPException(403, "Teacher key needed")
+    return cls
+
 
 def _turn(session_id: str, body: TurnBody, handler) -> dict:
     state = _session(session_id)

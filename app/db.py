@@ -28,6 +28,16 @@ CREATE TABLE IF NOT EXISTS sessions (
     updated_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_class ON sessions(class_code, chapter_id);
+
+-- A teacher's class. Students join with the 6-digit code; the dashboard needs
+-- the separate teacher key (only its SHA-256 hash is stored).
+CREATE TABLE IF NOT EXISTS classes (
+    code         TEXT PRIMARY KEY,
+    name         TEXT NOT NULL,
+    key_hash     TEXT NOT NULL,
+    demo         INTEGER NOT NULL DEFAULT 0,
+    created_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 
@@ -66,3 +76,29 @@ def load_session(session_id: str) -> dict | None:
     with connect() as con:
         row = con.execute("SELECT state FROM sessions WHERE id = ?", (session_id,)).fetchone()
     return json.loads(row["state"]) if row else None
+
+
+# ---------- classes ----------
+
+def insert_class(code: str, name: str, key_hash: str, demo: bool = False) -> bool:
+    """False if the code is already taken."""
+    with connect() as con:
+        try:
+            con.execute("INSERT INTO classes (code, name, key_hash, demo) VALUES (?, ?, ?, ?)",
+                        (code, name, key_hash, int(demo)))
+        except sqlite3.IntegrityError:
+            return False
+    return True
+
+
+def get_class(code: str) -> dict | None:
+    with connect() as con:
+        row = con.execute("SELECT code, name, key_hash, demo, created_at FROM classes WHERE code = ?", (code,)).fetchone()
+    return dict(row) if row else None
+
+
+def class_sessions(code: str, finished_only: bool = True) -> list[dict]:
+    sql = "SELECT state FROM sessions WHERE class_code = ?" + (" AND stage = 'done'" if finished_only else "")
+    with connect() as con:
+        rows = con.execute(sql, (code,)).fetchall()
+    return [json.loads(r["state"]) for r in rows]

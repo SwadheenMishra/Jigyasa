@@ -36,7 +36,8 @@ class SessionError(Exception):
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    # Milliseconds: the dashboard picks each student's *latest* session by this.
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
 
 
 def new_session(chapter: dict, language: str, brain: Brain,
