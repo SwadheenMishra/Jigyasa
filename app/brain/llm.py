@@ -169,7 +169,10 @@ class GeminiBrain(Brain):
             f"Common misconceptions (id: name):\n{miscon}\n\n"
             f"Student's explanation:\n{_fence(session.get('explanation', ''))}\n\n"
             f"Follow-up so far:\n{qa}\n\n"
-            f"Language for everything you write: {screen}.\n"
+            + ("Note: the explanation looked read from a textbook and a follow-up answer was weak; "
+               "judge understanding mainly from the follow-up answers.\n\n" if session.get("own_words_asked") else "")
+            + "Write fractions and numbers as digits on screen (1/8, 9.8); in *_speech fields write them as spoken words.\n"
+            + f"Language for everything you write: {screen}.\n"
             f"For every *_speech field write {speech}.\n"
         )
 
@@ -187,7 +190,8 @@ class GeminiBrain(Brain):
         prompt = self._context(chapter, session) + f"""
 Task: write follow-up question {n} of 3.
 Priority: (1) the biggest misconception in what the student said, (2) an important concept they missed,
-(3) a "why" about something they did say. Do not target any of these ids again: {asked or "none"}.
+(3) a "why" about something they did say. Already targeted: {asked or "none"}. Prefer a new target,
+unless the last answer shows the same misconception is still there.
 The question must refer to the student's own words, be AT MOST {ASK_WORDS} WORDS, and must not reveal the answer.
 Short like: "Mitti se khana? Toh gamle ki mitti kam kyun nahi hoti?"
 
@@ -213,8 +217,6 @@ Too long. Rewrite it in at most 10 words, same meaning, same JSON shape.""")
         valid = miscon_ids if kind == "misconception" else concept_ids if kind in ("concept", "probe") else []
         if tid not in valid:
             raise LLMError(f"invalid target {kind}/{tid}")
-        if tid in asked:
-            raise LLMError("repeated a target")
         mood = obj.get("mood") if obj.get("mood") in ("curious", "confused") else "curious"
         return {"text": text, "speak": self._speech(obj, "question") or text,
                 "target": {"kind": kind, "id": tid}, "mood": mood}

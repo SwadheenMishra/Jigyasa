@@ -26,6 +26,9 @@ QUESTIONS_PER_SESSION = 3
 MAX_IDK = 2  # the second "pata nahi" (or silence) on a question moves on
 MAX_EXPLAIN_TRIES = 2  # after two empty/off-topic explanations, ask questions anyway
 IDK_MAX_WORDS = 6  # "pata nahi, shayad kyunki dhoop..." is an answer, not an IDK
+COPY_MIN_WORDS = 45  # a "copied" explanation is long...
+COPY_MIN_CONCEPTS = 4  # ...and covers most concepts in one go,
+COPY_MIN_MARKERS = 2  # ...or uses several formal textbook phrases
 
 
 class SessionError(Exception):
@@ -52,6 +55,8 @@ def new_session(chapter: dict, language: str, brain: Brain,
         "current": None,  # current question dict from the brain
         "idk": 0,
         "offtopic": 0,
+        "copy_suspected": False,  # long, textbook-like explanation
+        "own_words_asked": False,  # ...followed by a weak answer: we asked "apne words mein"
         "log": [],  # every turn, including ones that were not scored
         "result": None,
         "created_at": _now(),
@@ -68,11 +73,15 @@ def classify(chapter: dict, raw: str, reason: str) -> str:
     `reason` comes from the browser: "silence" (nothing heard for 8 s),
     "noise" (sound detected but nothing recognised), or "pause"/"done"/
     "timeout"/"typed" for a normal end of turn.
+    A turn that is only fillers ("hmm", "uh") or a single character counts as
+    noise too: something was heard, but nothing we can fairly score.
     """
     t = chapter_text(chapter, raw)
     c = common()
     if not t:
         return "idk" if reason == "silence" else "noise"
+    if len(t) < 2 or all(tok in c["fillers"] for tok in t.split()):
+        return "noise"
 
     vocab = [k for x in chapter["concepts"] for k in x["keywords"]]
     has_content = contains_any(t, vocab) or contains_any(t, c["causal_words"])
@@ -110,7 +119,31 @@ def handle_explain(session: dict, chapter: dict, raw: str, reason: str, brain: B
             return _reply(session, "nudge", line(lines["explain_nudge"], lang), mood="curious")
 
     session["stage"] = "questions"
+    session["copy_suspected"] = looks_copied(chapter, session["explanation"])
     return _ask(session, brain.first_question(chapter, session), _ack(lang))
+
+
+def looks_copied(chapter: dict, explanation: str) -> bool:
+    """Long and textbook-like: lots of concepts at once, or formal book phrases.
+
+    Not proof of copying on its own; it only matters if the follow-up answers
+    are then weak (see _advance), which is the real signal (CLAUDE.md §4).
+    """
+    t = chapter_text(chapter, explanation)
+    if word_count(t) < COPY_MIN_WORDS:
+        return False
+    covered = sum(contains_any(t, c["keywords"]) for c in chapter["concepts"])
+    markers = sum(contains_any(t, [m]) for m in common()["textbook_markers"])
+    return covered >= COPY_MIN_CONCEPTS or markers >= COPY_MIN_MARKERS
+
+
+def is_weak_answer(chapter: dict, answer: dict) -> bool:
+    """No reason and no concept in it (or skipped with "pata nahi")."""
+    if answer["status"] != "answered":
+        return True
+    t = chapter_text(chapter, answer["transcript"])
+    vocab = [k for x in chapter["concepts"] for k in x["keywords"]]
+    return not (contains_any(t, common()["causal_words"]) or contains_any(t, vocab))
 
 
 def handle_answer(session: dict, chapter: dict, raw: str, reason: str, brain: Brain) -> dict:
@@ -165,6 +198,15 @@ def _advance(session: dict, chapter: dict, brain: Brain, text: str, status: str,
         session["stage"] = "review"
         session["current"] = None
         return _reply(session, "done", line(common()["lines"]["done"], session["language"]), mood="happy")
+
+    # Textbook-perfect explanation, then a weak answer: maybe it was read out.
+    # Ask once, kindly, for the same idea in their own words (counts as the next question).
+    if (session.get("copy_suspected") and not session.get("own_words_asked")
+            and is_weak_answer(chapter, session["answers"][-1])):
+        session["own_words_asked"] = True
+        own = line(common()["lines"]["own_words"], session["language"])
+        question = {**own, "target": q["target"], "mood": "curious"}
+        return _ask(session, question, {"text": "", "speak": ""})
     return _ask(session, brain.next_question(chapter, session), prefix)
 
 

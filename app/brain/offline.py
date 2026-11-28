@@ -183,4 +183,7 @@ class OfflineBrain(Brain):
                 continue
             t = chapter_text(chapter, ans["transcript"])
             points += 0.5 * contains_any(t, causal) + 0.5 * contains_any(t, keywords)
+        # Textbook-like explanation + weak follow-up answers: likely read out (CLAUDE.md §4).
+        if session.get("own_words_asked"):
+            points *= 0.5
         return round(100 * points / QUESTIONS_PER_SESSION)

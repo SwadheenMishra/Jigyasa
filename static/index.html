@@ -15,10 +15,15 @@
   </header>
 
   <main>
-    <p id="voice-warning" class="notice" hidden>
-      Voice works best in Chrome or Edge. · आवाज़ के लिए Chrome या Edge खोलें। Neeche likh kar bhi bata sakte ho.
+    <!-- Filled by app.js: unsupported browser, no https, no TTS. -->
+    <p id="voice-warning" class="notice" hidden></p>
+    <p id="net-warning" class="notice" hidden>
+      📶 Internet nahi hai. Kyun-Kyun offline brain se chalega — bolne ki jagah neeche likho. · No internet: type your answers below.
     </p>
-    <p id="voice-error" class="notice" hidden></p>
+    <p id="voice-error" class="notice" hidden>
+      <span id="voice-error-text"></span>
+      <button id="btn-voice-retry" class="link-btn" type="button">🎤 Phir se try karo · Retry voice</button>
+    </p>
 
     <!-- Kyun-Kyun: an original character, drawn in SVG. Moods: curious, listening, confused, happy. -->
     <section class="stage">
@@ -56,6 +61,14 @@
 
     <!-- Home: pick language, then say the topic or tap a chapter (max 2 taps to start). -->
     <section id="screen-home" class="screen">
+      <div id="resume-card" class="resume" hidden>
+        <p><strong>Pichla session jaari rakhein? · Continue your last session?</strong><br><span id="resume-text"></span></p>
+        <div class="row">
+          <button id="btn-resume" class="btn primary" type="button">▶ Jaari rakho · Continue</button>
+          <button id="btn-resume-new" class="btn" type="button">Naya shuru · Start new</button>
+        </div>
+      </div>
+
       <h2 class="label">Bhasha chuno · Pick your language</h2>
       <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
 

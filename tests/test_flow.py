@@ -136,3 +136,55 @@ def test_finish_before_explain_is_rejected():
     with TestClient(app) as c:
         sid = start(c)["session_id"]
         assert c.post(f"/api/session/{sid}/finish").status_code == 409
+
+
+# ---------- milestone 5: error handling ----------
+
+TEXTBOOK = (
+    "Photosynthesis is the process by which green plants prepare their food. In the presence of sunlight, "
+    "the chlorophyll in the leaves absorbs light energy. Plants take carbon dioxide from the air and water "
+    "from the roots, and with the help of this energy they make glucose. Oxygen is released as a by-product, "
+    "therefore photosynthesis is very important for all living beings on the earth."
+)
+
+
+def test_fillers_count_as_noise():
+    with TestClient(app) as c:
+        sid = start(c)["session_id"]
+        for filler in ["hmm", "uh umm", "हम्म", "a"]:
+            assert c.post(f"/api/session/{sid}/explain", json={"transcript": filler}).json()["action"] == "noise"
+        # nothing was scored: still in the explain stage
+        assert c.get(f"/api/session/{sid}").json()["stage"] == "explain"
+
+
+def test_copied_answer_asks_own_words_and_lowers_reasoning():
+    with TestClient(app) as c:
+        sid = start(c)["session_id"]
+        c.post(f"/api/session/{sid}/explain", json={"transcript": TEXTBOOK})
+        state = c.get(f"/api/session/{sid}").json()
+        assert state["copy_suspected"] is True
+        r = c.post(f"/api/session/{sid}/answer", json={"transcript": "plant ko achha lagta hai"}).json()  # on-topic but weak
+        assert r["action"] == "question" and "apne words" in r["question"]
+        for ans in ["kyunki patte dhoop lete hain", "isliye oxygen nikalti hai"]:
+            r = c.post(f"/api/session/{sid}/answer", json={"transcript": ans}).json()
+        assert r["action"] == "done"
+        result = c.post(f"/api/session/{sid}/finish").json()
+        assert result["breakdown"]["reasoning"] == 33  # 2 good answers (67) halved
+
+
+def test_textbook_explanation_with_strong_answers_is_not_penalised():
+    with TestClient(app) as c:
+        sid = start(c)["session_id"]
+        c.post(f"/api/session/{sid}/explain", json={"transcript": TEXTBOOK})
+        for ans in ["kyunki raat ko dhoop nahi hoti", "isliye patte hare hote hain", "because roots se paani aata hai"]:
+            r = c.post(f"/api/session/{sid}/answer", json={"transcript": ans}).json()
+            assert "apne words" not in (r.get("question") or "")
+        result = c.post(f"/api/session/{sid}/finish").json()
+        assert result["breakdown"]["reasoning"] == 100
+
+
+def test_short_own_explanation_not_suspected():
+    with TestClient(app) as c:
+        sid = start(c)["session_id"]
+        c.post(f"/api/session/{sid}/explain", json={"transcript": SOIL_EXPLANATION})
+        assert c.get(f"/api/session/{sid}").json()["copy_suspected"] is False

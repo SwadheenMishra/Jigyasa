@@ -45,6 +45,19 @@ main { max-width: 520px; margin: 0 auto; padding: 0 16px 32px; }
   padding: 10px 12px; font-size: .9rem; margin: 0 0 12px;
 }
 
+.link-btn {
+  font: inherit; font-weight: 700; color: var(--sky); background: none; border: 0; padding: 4px 0;
+  cursor: pointer; text-decoration: underline; display: block; margin-top: 4px;
+}
+
+.resume {
+  background: var(--paper); border: 3px solid var(--sky); border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: 8px; text-align: left; box-shadow: var(--shadow);
+}
+.resume p { margin: 0 0 8px; }
+.resume .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.resume .btn { margin: 0; flex: 1; min-width: 140px; width: auto; font-size: 1rem; }
+
 /* ---------- Kyun-Kyun + speech bubble ---------- */
 .stage { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 16px; }
 .kk svg { display: block; overflow: visible; }

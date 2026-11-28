@@ -2,6 +2,14 @@
  * Voice first (voice.js), with a text box always available as a fallback.
  * All reasoning happens on the server (/api/session/...), so both brains
  * behave the same from the browser's point of view.
+ *
+ * Things that go wrong, and what we do (CLAUDE.md §4 "When things go wrong"):
+ *  - no SpeechRecognition (Firefox) / no TTS -> notice + text box, text on screen
+ *  - mic blocked / recognition network error -> notice, text box, "retry voice" button
+ *  - page not on https/localhost            -> notice (browsers block the mic there)
+ *  - device offline                         -> banner; typed answers still work on the offline brain
+ *  - server request fails or is slow        -> retry once, then keep the student's words and ask to resend
+ *  - page closed / refreshed mid-session    -> progress kept in localStorage, "continue?" card on return
  */
 (function () {
   "use strict";
@@ -14,6 +22,9 @@
     explain: { silenceMs: 3000, noSpeechMs: 10000, maxMs: 120000 },
     answer: { silenceMs: 3000, noSpeechMs: 8000, maxMs: 45000 },
   };
+  const MAX_TRANSCRIPT = 5000; // server accepts 6000
+  const RESUME_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+  const PROGRESS_KEY = "jigyasa.session";
 
   // hi = Roman Hinglish (shown), dev = same line in Devanagari (spoken by a Hindi voice).
   const UI = {
@@ -24,6 +35,11 @@
     thinking: { hi: "Hmm… soch raha hoon…", en: "Hmm… thinking…", dev: "हम्म, सोच रहा हूँ." },
     oops: { hi: "Oops, kuch gadbad ho gayi. Phir se try karo?", en: "Oops, something went wrong. Try again?",
             dev: "उफ़, कुछ गड़बड़ हो गई. फिर से ट्राई करो?" },
+    netFail: { hi: "Internet slow hai, baat pahunchi nahi. Phir se bolo, ya Bhejo dabao.",
+               en: "The internet is slow, that didn't reach me. Say it again, or press Send.",
+               dev: "इंटरनेट स्लो है, बात पहुँची नहीं. फिर से बोलो, या भेजो दबाओ." },
+    resumeExplain: { hi: "Chalo, wahin se shuru karte hain. Samjhao na!", en: "Let's pick up where we left off. Explain to me!",
+                     dev: "चलो, वहीं से शुरू करते हैं. समझाओ ना!" },
     voiceTest: { hi: "Namaste! Main Kyun-Kyun hoon. Kya meri awaaz saaf sunai de rahi hai?",
                  en: "Hello! I am Kyun-Kyun. Can you hear me clearly?",
                  dev: "नमस्ते! मैं क्यूं-क्यूं हूँ. क्या मेरी आवाज़ साफ़ सुनाई दे रही है?" },
@@ -54,19 +70,41 @@
 
   function loadPref(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
   function savePref(key, v) { try { localStorage.setItem(key, v); } catch (_) { /* private mode */ } }
+  function dropPref(key) { try { localStorage.removeItem(key); } catch (_) { /* private mode */ } }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const lineKey = () => (state.language === "en" ? "en" : "hi");
   const ui = (name) => UI[name][lineKey()];
   /** A UI line as {text, speak} for kkSay. */
   const uiLine = (name) => ({ text: ui(name), speak: state.language === "en" ? ui(name) : UI[name].dev });
   const recLang = () => (state.languages.find((l) => l.id === state.language) || { rec: "hi-IN" }).rec;
+  const chapterById = (id) => state.chapters.find((c) => c.id === id);
 
-  async function api(path, body) {
+  /**
+   * JSON API call. A network failure or timeout is retried once (slow 3G);
+   * an HTTP error is not, and carries err.status.
+   */
+  async function api(path, body, { retries = 1, timeoutMs = 20000 } = {}) {
     const opts = body === undefined ? {} : {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     };
-    const r = await fetch(path, opts);
-    if (!r.ok) throw new Error(`${path} -> ${r.status}`);
-    return r.json();
+    for (let attempt = 0; ; attempt++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        const r = await fetch(path, { ...opts, signal: ctrl.signal });
+        if (!r.ok) {
+          const err = new Error(`${path} -> ${r.status}`);
+          err.status = r.status;
+          throw err;
+        }
+        return await r.json();
+      } catch (err) {
+        if (err.status || attempt >= retries) throw err;
+        await sleep(1500);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
   }
 
   function show(screen) {
@@ -98,13 +136,39 @@
   }
   function stopTimer() { clearInterval(state.timer); $("timer").textContent = ""; }
 
+  // ---------- progress (localStorage): only ids, never transcripts ----------
+
+  function saveProgress() {
+    if (!state.sessionId) return;
+    savePref(PROGRESS_KEY, JSON.stringify({
+      id: state.sessionId, chapterId: state.chapterId, language: state.language, at: Date.now(),
+    }));
+  }
+  function clearProgress() { dropPref(PROGRESS_KEY); }
+  function loadProgress() {
+    try {
+      const p = JSON.parse(loadPref(PROGRESS_KEY) || "null");
+      return p && p.id && Date.now() - p.at < RESUME_MAX_AGE_MS ? p : null;
+    } catch (_) { return null; }
+  }
+
+  // ---------- voice problems ----------
+
   function handleVoiceError(err) {
     state.voiceOk = false;
     micState(false);
     const msg = VOICE_ERRORS[err && err.code] || "Voice stopped working. Please type below. · नीचे लिखो।";
-    $("voice-error").textContent = msg;
+    $("voice-error-text").textContent = msg;
     $("voice-error").hidden = false;
     $("text-input").focus();
+  }
+
+  /** "Retry voice": e.g. after allowing the mic or getting internet back. */
+  function retryVoice() {
+    if (!V.canListen) return;
+    state.voiceOk = true;
+    $("voice-error").hidden = true;
+    if (state.turn && !state.turn.voice) state.turn.startVoice();
   }
 
   // ---------- one turn of input: voice or typed, whichever comes first ----------
@@ -120,7 +184,21 @@
           state.turn = null;
           stopTimer();
           micState(false);
-          resolve(value);
+          if (turn.voice) turn.voice.cancel();
+          resolve({ ...value, transcript: (value.transcript || "").slice(0, MAX_TRANSCRIPT) });
+        },
+        startVoice() {
+          if (!state.voiceOk || settled) return;
+          micState(true);
+          turn.voice = V.listen({
+            lang: recLang(),
+            ...LIMITS[kind],
+            onText: (t) => { $("transcript").textContent = t; },
+          });
+          turn.voice.promise.then(turn.settle).catch((err) => {
+            turn.voice = null;
+            handleVoiceError(err); // keep waiting: the student can type, or retry voice
+          });
         },
       };
       if (state.pendingTyped) { // typed while Kyun-Kyun was speaking
@@ -133,18 +211,7 @@
       $("transcript").textContent = "";
       setMood("listening");
       startTimer(LIMITS[kind].maxMs);
-
-      if (!state.voiceOk) return; // wait for the text box
-      micState(true);
-      turn.voice = V.listen({
-        lang: recLang(),
-        ...LIMITS[kind],
-        onText: (t) => { $("transcript").textContent = t; },
-      });
-      turn.voice.promise.then(turn.settle).catch((err) => {
-        turn.voice = null;
-        handleVoiceError(err); // keep waiting: the student can type instead
-      });
+      turn.startVoice(); // no-op without voice: wait for the text box
     });
   }
 
@@ -168,7 +235,6 @@
     const value = { transcript: typed, reason: "typed" };
     const turn = state.turn;
     if (turn) {
-      if (turn.voice) turn.voice.cancel();
       turn.settle(value);
     } else {
       state.pendingTyped = value;
@@ -178,22 +244,34 @@
 
   // ---------- the conversation ----------
 
+  function showTalk(chapter) {
+    show("talk");
+    $("step-label").textContent = chapter ? `${chapter.emoji} ${chapter.title} · Samjhao! · Explain` : "Samjhao! · Explain";
+    $("question-card").hidden = true;
+    $("transcript").textContent = "";
+  }
+
+  function showQuestion(question, number, total = 3) {
+    $("step-label").textContent = `Sawaal ${number}/${total} · Question`;
+    $("question-card").textContent = question;
+    $("question-card").hidden = false;
+  }
+
   async function startChapter(chapterId) {
     if (state.busy) return;
     state.busy = true;
     state.pendingTyped = null;
     V.stopSpeaking();
+    $("resume-card").hidden = true;
     try {
       const r = await api("/api/session/start", { chapter_id: chapterId, language: state.language });
       state.sessionId = r.session_id;
       state.chapterId = chapterId;
+      saveProgress();
       setBadge(r.brain);
-      show("talk");
-      $("step-label").textContent = `${r.chapter.emoji} ${r.chapter.title} · Samjhao! · Explain`;
-      $("question-card").hidden = true;
-      $("transcript").textContent = "";
+      showTalk(r.chapter);
       await kkSay({ text: r.say, speak: r.speak }, r.mood);
-      await conversation();
+      await conversation("explain");
     } catch (err) {
       console.error(err);
       await kkSay(uiLine("oops"), "confused");
@@ -202,30 +280,47 @@
     }
   }
 
-  async function conversation() {
-    let stage = "explain";
-    for (;;) {
+  async function conversation(stage) {
+    while (stage === "explain" || stage === "questions") {
       const turn = await getTurn(stage === "explain" ? "explain" : "answer");
       setMood("curious");
       bubble(ui("thinking"));
       const endpoint = stage === "explain" ? "explain" : "answer";
-      const reply = await api(`/api/session/${state.sessionId}/${endpoint}`, turn);
-      setBadge(reply.brain);
-
-      if (reply.question) {
-        $("step-label").textContent = `Sawaal ${reply.q_number}/${reply.q_total} · Question`;
-        $("question-card").textContent = reply.question;
-        $("question-card").hidden = false;
+      let reply;
+      try {
+        reply = await api(`/api/session/${state.sessionId}/${endpoint}`, turn);
+      } catch (err) {
+        if (err.status === 409) { // the server already moved on (e.g. a retried request got through): sync up
+          stage = await syncFromServer();
+          continue;
+        }
+        console.error(err);
+        $("text-input").value = turn.transcript; // keep their words: one tap on "Bhejo" resends
+        await kkSay(uiLine("netFail"), "confused");
+        continue;
       }
+      setBadge(reply.brain);
+      saveProgress();
+      if (reply.question) showQuestion(reply.question, reply.q_number, reply.q_total);
       await kkSay({ text: reply.say, speak: reply.speak }, reply.mood);
-      if (reply.action === "done") break;
-      stage = reply.stage === "questions" ? "questions" : "explain";
+      stage = reply.action === "done" ? "review" : reply.stage;
     }
     await showResults();
   }
 
+  /** Re-read the session from the server and show its current question. Returns its stage. */
+  async function syncFromServer() {
+    const s = await api(`/api/session/${state.sessionId}`);
+    if (s.stage === "questions" && s.current) {
+      showQuestion(s.current.text, s.answers.length + 1);
+      await kkSay({ text: s.current.text, speak: s.current.speak || s.current.text }, s.current.mood || "curious");
+    }
+    return s.stage;
+  }
+
   async function showResults() {
     const r = await api(`/api/session/${state.sessionId}/finish`, {});
+    clearProgress();
     setBadge(r.brain);
     show("results");
     $("score").textContent = r.score;
@@ -264,6 +359,59 @@
       ul.append(li);
     }
   }
+
+  // ---------- resume after a refresh or dropped connection ----------
+
+  async function offerResume() {
+    const p = loadProgress();
+    if (!p) return;
+    let s;
+    try {
+      s = await api(`/api/session/${p.id}`, undefined, { retries: 0, timeoutMs: 8000 });
+    } catch (_) {
+      clearProgress(); // gone (or server unreachable): don't nag
+      return;
+    }
+    if (!["explain", "questions", "review"].includes(s.stage)) { clearProgress(); return; }
+    const ch = chapterById(s.chapter_id);
+    const where = s.stage === "explain" ? "Samjhana · Explaining"
+      : s.stage === "questions" ? `Sawaal ${s.answers.length + 1}/3 · Question ${s.answers.length + 1}/3`
+        : "Result · Results";
+    $("resume-text").textContent = `${ch ? `${ch.emoji} ${ch.title}` : s.chapter_id} — ${where}`;
+    $("resume-card").hidden = false;
+    $("btn-resume").onclick = () => resume(s);
+    $("btn-resume-new").onclick = () => { clearProgress(); $("resume-card").hidden = true; };
+  }
+
+  async function resume(s) {
+    if (state.busy) return;
+    state.busy = true;
+    $("resume-card").hidden = true;
+    state.sessionId = s.id;
+    state.chapterId = s.chapter_id;
+    if (state.languages.some((l) => l.id === s.language)) {
+      state.language = s.language;
+      renderLanguages();
+    }
+    try {
+      showTalk(chapterById(s.chapter_id));
+      if (s.stage === "explain") {
+        await kkSay(uiLine("resumeExplain"), "curious");
+        await conversation("explain");
+      } else if (s.stage === "questions") {
+        await conversation(await syncFromServer());
+      } else {
+        await showResults();
+      }
+    } catch (err) {
+      console.error(err);
+      await kkSay(uiLine("oops"), "confused");
+    } finally {
+      state.busy = false;
+    }
+  }
+
+  // ---------- topic by voice ----------
 
   async function topicByVoice() {
     if (state.busy) return;
@@ -343,11 +491,31 @@
     $("privacy-ai").hidden = brain !== "llm";
   }
 
+  /** Browser / connection checks that don't depend on the server. */
+  function environmentNotices() {
+    const warn = [];
+    if (!V.canListen) {
+      warn.push("Voice works best in Chrome or Edge. · आवाज़ के लिए Chrome या Edge खोलें। Neeche likh kar bhi bata sakte ho.");
+    } else if (!window.isSecureContext) {
+      warn.push("The microphone only works on https:// or localhost. Please type below. · माइक के लिए https चाहिए — नीचे लिखो।");
+      state.voiceOk = false;
+    }
+    if (!V.canSpeak) warn.push("This browser can't speak, so read Kyun-Kyun's words on screen. · स्क्रीन पर पढ़ो।");
+    $("voice-warning").textContent = warn.join(" ");
+    $("voice-warning").hidden = !warn.length;
+
+    const net = () => { $("net-warning").hidden = navigator.onLine; };
+    window.addEventListener("online", net);
+    window.addEventListener("offline", net);
+    net();
+  }
+
   async function init() {
-    if (!V.canListen) $("voice-warning").hidden = false;
+    environmentNotices();
     $("btn-topic").addEventListener("click", topicByVoice);
     $("btn-done").addEventListener("click", onDone);
     $("text-form").addEventListener("submit", onTyped);
+    $("btn-voice-retry").addEventListener("click", retryVoice);
     $("btn-again").addEventListener("click", () => startChapter(state.chapterId));
     $("btn-voice-test").addEventListener("click", async () => {
       if (state.busy) return;
@@ -371,6 +539,7 @@
       if (!state.languages.some((l) => l.id === state.language)) state.language = data.default_language;
       renderLanguages();
       renderChapters();
+      await offerResume();
     } catch (err) {
       console.error(err);
       bubble(ui("oops"));

@@ -15,8 +15,22 @@
     "nahi", "nahin", "nai", "nhi", "not", "no", "never", "doesnt", "dont", "isnt", "cannot", "cant",
     "नहीं", "नही"
   ],
+  "_fillers": "A turn made only of these is treated as noise (speech detected, nothing usable).",
+  "fillers": [
+    "hmm", "hm", "hmmm", "hmmmm", "um", "umm", "ummm", "uh", "uhh", "uhm", "ah", "aah", "aa", "aaa", "er", "erm", "huh", "mm",
+    "हम्म", "हम", "हम्म्म", "अं", "आ", "आं", "उम्म", "उं", "अ"
+  ],
+  "_textbook_markers": "Formal phrases typical of a read-out textbook answer (used to spot copied explanations).",
+  "textbook_markers": [
+    "process", "is defined as", "is called", "are called", "known as", "therefore", "hence", "thus", "in the presence of",
+    "with the help of", "according to", "is the process", "law of",
+    "prakriya", "kehte hain", "kahte hain", "dwara", "upasthiti", "phalswaroop", "atah", "anusar",
+    "प्रक्रिया", "कहते हैं", "द्वारा", "उपस्थिति", "फलस्वरूप", "अतः", "अनुसार", "निम्नलिखित"
+  ],
 
   "lines": {
+    "own_words": {"hi": "Achha bola! Ab apne words mein batao, kyun?", "en": "Nicely said! Now tell me in your own words: why?",
+                  "dev": "अच्छा बोला! अब अपने वर्ड्स में बताओ, क्यों?"},
     "noise": {"hi": "Bahut shor hai, thoda paas aakar bolo na?", "en": "It's very noisy. Can you come closer and say it again?",
               "dev": "बहुत शोर है, थोड़ा पास आकर बोलो ना?"},
     "explain_nudge": {"hi": "Jo bhi pata hai, woh batao! Thoda sa bhi chalega.", "en": "Tell me whatever you know! Even a little bit is fine.",
