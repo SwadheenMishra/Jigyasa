@@ -41,6 +41,8 @@
                dev: "इंटरनेट स्लो है, बात पहुँची नहीं. फिर से बोलो, या भेजो दबाओ." },
     resumeExplain: { hi: "Chalo, wahin se shuru karte hain. Samjhao na!", en: "Let's pick up where we left off. Explain to me!",
                      dev: "चलो, वहीं से शुरू करते हैं. समझाओ ना!" },
+    demoDone: { hi: "Demo khatam! Ab tumhari baari — koi bhi chapter chuno.", en: "Demo done! Your turn now — pick any chapter.",
+                dev: "डेमो खत्म! अब तुम्हारी बारी, कोई भी चैप्टर चुनो." },
     voiceTest: { hi: "Namaste! Main Kyun-Kyun hoon. Kya meri awaaz saaf sunai de rahi hai?",
                  en: "Hello! I am Kyun-Kyun. Can you hear me clearly?",
                  dev: "नमस्ते! मैं क्यूं-क्यूं हूँ. क्या मेरी आवाज़ साफ़ सुनाई दे रही है?" },
@@ -62,6 +64,8 @@
     chapterId: null,
     turn: null,
     pendingTyped: null,
+    demo: null, // scripted student (demo.js) while Demo mode runs
+    lastTarget: null, // target id of the current question (Demo mode picks a fitting answer)
     voiceOk: V.canListen,
     busy: false,
     timer: null,
@@ -122,7 +126,16 @@
     setMood(mood);
     bubble(line.text);
     micState(false);
-    await V.speakLine(line, state.language);
+    $("kk").classList.add("talking");
+    try { await V.speakLine(line, state.language); } finally { $("kk").classList.remove("talking"); }
+  }
+
+  /** Progress dots: 0 = explain, 1-3 = questions, 4 = results. */
+  function setProgress(step) {
+    document.querySelectorAll("#progress-dots li").forEach((li, i) => {
+      li.classList.toggle("done", i < step);
+      li.classList.toggle("now", i === step);
+    });
   }
 
   function startTimer(ms) {
@@ -208,7 +221,30 @@
 
   // ---------- one turn of input: voice or typed, whichever comes first ----------
 
+  /** Demo mode: type the scripted student's line onto the screen while a second voice says it. */
+  async function demoTurn(kind) {
+    const line = state.demo.next(kind === "explain" ? "explain" : "answer", state.lastTarget);
+    setMood("listening");
+    micState(true);
+    const box = $("transcript");
+    box.textContent = "";
+    box.classList.add("typing");
+    const typing = (async () => {
+      for (const word of line.text.split(" ")) {
+        if (!state.demo) return;
+        box.textContent = `${box.textContent} ${word}`.trim();
+        await sleep(110);
+      }
+    })();
+    await Promise.all([typing, V.speakLine({ text: line.text, speak: line.dev }, "hinglish", { student: true })]);
+    box.classList.remove("typing");
+    micState(false);
+    await sleep(400);
+    return { transcript: line.text, reason: "typed" };
+  }
+
   function getTurn(kind) {
+    if (state.demo) return demoTurn(kind);
     return new Promise((resolve) => {
       let settled = false;
       const turn = {
@@ -284,26 +320,28 @@
     $("step-label").textContent = chapter ? `${chapter.emoji} ${chapter.title} · Samjhao! · Explain` : "Samjhao! · Explain";
     $("question-card").hidden = true;
     $("transcript").textContent = "";
+    setProgress(0);
   }
 
   function showQuestion(question, number, total = 3) {
+    setProgress(number);
     $("step-label").textContent = `Sawaal ${number}/${total} · Question`;
     $("question-card").textContent = question;
     $("question-card").hidden = false;
   }
 
-  async function startChapter(chapterId) {
+  async function startChapter(chapterId, { demo = false } = {}) {
     if (state.busy) return;
     state.busy = true;
     state.pendingTyped = null;
     V.stopSpeaking();
     $("resume-card").hidden = true;
     try {
-      const cls = joinedClass();
+      const cls = demo ? null : joinedClass();
       let r;
       try {
         r = await api("/api/session/start", {
-          chapter_id: chapterId, language: state.language,
+          chapter_id: chapterId, language: state.language, demo,
           class_code: cls ? cls.code : null, student_name: cls ? cls.student : null,
         });
       } catch (err) {
@@ -314,7 +352,7 @@
       }
       state.sessionId = r.session_id;
       state.chapterId = chapterId;
-      saveProgress();
+      if (!demo) saveProgress();
       setBadge(r.brain);
       showTalk(r.chapter);
       await kkSay({ text: r.say, speak: r.speak }, r.mood);
@@ -322,9 +360,29 @@
     } catch (err) {
       console.error(err);
       await kkSay(uiLine("oops"), "confused");
+      stopDemo();
     } finally {
       state.busy = false;
     }
+  }
+
+  // ---------- Demo mode ----------
+
+  async function startDemo() {
+    if (state.busy || !window.JDemo) return;
+    V.stopSpeaking();
+    state.demo = window.JDemo.createDemo();
+    state.language = state.demo.language; // the script is Hinglish
+    renderLanguages();
+    $("demo-banner").hidden = false;
+    $("demo-banner-text").textContent = "▶ DEMO · A scripted student explains; Kyun-Kyun's real brain answers live.";
+    await startChapter(state.demo.chapter, { demo: true });
+  }
+
+  function stopDemo() {
+    if (!state.demo) return;
+    state.demo = null;
+    $("demo-banner").hidden = true;
   }
 
   async function conversation(stage) {
@@ -347,7 +405,8 @@
         continue;
       }
       setBadge(reply.brain);
-      saveProgress();
+      state.lastTarget = reply.target_id;
+      if (!state.demo) saveProgress();
       if (reply.question) showQuestion(reply.question, reply.q_number, reply.q_total);
       await kkSay({ text: reply.say, speak: reply.speak }, reply.mood);
       stage = reply.action === "done" ? "review" : reply.stage;
@@ -370,8 +429,8 @@
     clearProgress();
     setBadge(r.brain);
     show("results");
-    $("score").textContent = r.score;
-    $("score-ring").style.setProperty("--pct", r.score);
+    countUp(r.score);
+    $("celebrate").hidden = r.score < 75;
     $("feedback").textContent = r.feedback_in_student_language;
     const parts = r.breakdown || {};
     $("breakdown").hidden = !r.breakdown;
@@ -396,6 +455,26 @@
       box.append(card);
     }
     await kkSay({ text: r.feedback_in_student_language, speak: r.feedback_speech }, "happy");
+    if (state.demo) {
+      stopDemo();
+      $("demo-banner").hidden = false;
+      $("demo-banner-text").textContent = "✅ Demo complete. The questions, hint and score above came from the real brain.";
+      await kkSay(uiLine("demoDone"), "happy");
+    }
+  }
+
+  /** Animate the score ring from 0 to the score. */
+  function countUp(score) {
+    const target = Math.max(0, Math.min(100, Number(score) || 0));
+    const t0 = performance.now();
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / 1200);
+      const v = Math.round(target * (1 - Math.pow(1 - k, 3)));
+      $("score").textContent = v;
+      $("score-ring").style.setProperty("--pct", v);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   function fillList(ul, items) {
@@ -563,11 +642,13 @@
     $("btn-done").addEventListener("click", onDone);
     $("text-form").addEventListener("submit", onTyped);
     $("btn-voice-retry").addEventListener("click", retryVoice);
+    $("btn-demo").addEventListener("click", startDemo);
+    $("btn-demo-stop").addEventListener("click", () => location.reload());
     $("btn-join").addEventListener("click", () => { $("join-panel").hidden = !$("join-panel").hidden; $("join-code").focus(); });
     $("btn-leave").addEventListener("click", () => { dropPref(CLASS_KEY); renderJoin(); $("join-panel").hidden = false; });
     $("join-panel").addEventListener("submit", joinClass);
     renderJoin();
-    $("btn-again").addEventListener("click", () => startChapter(state.chapterId));
+    $("btn-again").addEventListener("click", () => { $("demo-banner").hidden = true; startChapter(state.chapterId); });
     $("btn-voice-test").addEventListener("click", async () => {
       if (state.busy) return;
       await V.voicesReady();
@@ -577,6 +658,7 @@
     });
     $("btn-home").addEventListener("click", () => {
       V.stopSpeaking();
+      $("demo-banner").hidden = true;
       show("home");
       setMood("curious");
       bubble("Ab kya sikhaoge? · What will you teach me next?");

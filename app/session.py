@@ -41,7 +41,7 @@ def _now() -> str:
 
 
 def new_session(chapter: dict, language: str, brain: Brain,
-                student_name: str | None = None, class_code: str | None = None) -> dict:
+                student_name: str | None = None, class_code: str | None = None, demo: bool = False) -> dict:
     return {
         "id": secrets.token_urlsafe(12),
         "chapter_id": chapter["id"],
@@ -49,6 +49,7 @@ def new_session(chapter: dict, language: str, brain: Brain,
         "student_name": student_name,
         "class_code": class_code,
         "brain": brain.name,
+        "demo": demo,  # scripted Demo-mode session (never part of a class)
         "stage": "explain",  # explain -> questions -> review -> done
         "explanation": "",
         "explain_tries": 0,
@@ -229,6 +230,7 @@ def _reply(session: dict, action: str, say: dict, mood: str) -> dict:
         "say": say["text"],
         "speak": say["speak"],
         "question": current["text"] if current else None,
+        "target_id": current["target"]["id"] if current else None,  # lets Demo mode pick a fitting scripted answer
         "q_number": min(len(session["answers"]) + 1, QUESTIONS_PER_SESSION),
         "q_total": QUESTIONS_PER_SESSION,
         "stage": session["stage"],

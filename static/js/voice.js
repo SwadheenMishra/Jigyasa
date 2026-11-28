@@ -165,10 +165,12 @@
     return score;
   }
 
-  function bestVoice(lang) {
+  /** Best voice for a locale; with `avoid`, the best *other* voice (for the demo student). */
+  function bestVoice(lang, avoid = null) {
     let best = null;
     let bestScore = -1;
     for (const v of voices) {
+      if (avoid && v.name === avoid.name) continue;
       const s = rankVoice(v, lang);
       if (s > bestScore) { best = v; bestScore = s; }
     }
@@ -185,7 +187,13 @@
     { re: /[ऀ-ॿ]/, langs: ["hi-IN"] }, // Devanagari (Hindi, Hinglish, Marathi)
   ];
 
-  function chooseSpeech(line, language) {
+  function chooseSpeech(line, language, student = false) {
+    if (student) {
+      // Demo student: a different voice from Kyun-Kyun's when the device has one.
+      const kk = chooseSpeech(line, language);
+      const other = kk.voice ? bestVoice(kk.lang, kk.voice) : null;
+      return { ...kk, voice: other && rankVoice(other, kk.lang) >= 100 ? other : kk.voice };
+    }
     const speak = line.speak || "";
     if (language !== "en") {
       for (const s of SCRIPTS) {
@@ -206,13 +214,13 @@
     return { text: line.text, voice: english, lang: english ? english.lang : "en-IN" };
   }
 
-  function speakOne(text, voice, lang) {
+  function speakOne(text, voice, lang, pitch = KK_PITCH, rate = KK_RATE) {
     return new Promise((resolve) => {
       const u = new SpeechSynthesisUtterance(text);
       u.lang = lang;
       if (voice) u.voice = voice;
-      u.pitch = KK_PITCH;
-      u.rate = KK_RATE;
+      u.pitch = pitch;
+      u.rate = rate;
       let done = false;
       const finish = () => {
         if (done) return;
@@ -237,18 +245,21 @@
 
   /**
    * Speak one of Kyun-Kyun's lines: {text (shown), speak (for TTS)}.
+   * { student: true } speaks as the Demo-mode student instead: another voice
+   * if available, normal pitch, a little faster.
    * Always resolves, even if TTS is missing, blocked or stalls.
    */
-  async function speakLine(line, language = "hinglish") {
+  async function speakLine(line, language = "hinglish", { student = false } = {}) {
     if (!window.speechSynthesis || !line || !(line.text || line.speak)) return;
     const token = ++speakToken;
     speechSynthesis.cancel();
     await voicesReady();
-    const { text, voice, lang } = chooseSpeech(line, language);
+    const { text, voice, lang } = chooseSpeech(line, language, student);
+    const [pitch, rate] = student ? [0.9, 1.05] : [KK_PITCH, KK_RATE];
     await new Promise((r) => setTimeout(r, 60)); // Chrome drops an utterance queued right after cancel()
     for (const sentence of splitSentences(text)) {
       if (token !== speakToken) return; // interrupted
-      await speakOne(sentence, voice, lang);
+      await speakOne(sentence, voice, lang, pitch, rate);
     }
   }
 

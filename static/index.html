@@ -6,6 +6,7 @@
   <title>Jigyasa — जिज्ञासा</title>
   <meta name="description" content="Explain a concept out loud to Kyun-Kyun, your curious little sibling.">
   <meta name="theme-color" content="#fff8e7">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -20,6 +21,10 @@
     <p id="net-warning" class="notice" hidden>
       📶 Internet nahi hai. Kyun-Kyun offline brain se chalega — bolne ki jagah neeche likho. · No internet: type your answers below.
     </p>
+    <div id="demo-banner" class="demo-banner" hidden>
+      <span id="demo-banner-text"></span>
+      <button id="btn-demo-stop" class="link-btn" type="button">✕ Stop demo</button>
+    </div>
     <p id="voice-error" class="notice" hidden>
       <span id="voice-error-text"></span>
       <button id="btn-voice-retry" class="link-btn" type="button">🎤 Phir se try karo · Retry voice</button>
@@ -69,6 +74,10 @@
         </div>
       </div>
 
+      <p class="tagline">You can copy an answer. You can't copy understanding.</p>
+      <button id="btn-demo" class="btn demo-btn" type="button">▶ Demo dekho · Watch a 90-second demo
+        <small>no mic or key needed</small></button>
+
       <h2 class="label">Bhasha chuno · Pick your language</h2>
       <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
 
@@ -101,6 +110,10 @@
 
     <!-- Talk: explanation, then 3 follow-up questions. -->
     <section id="screen-talk" class="screen" hidden>
+      <ol id="progress-dots" class="dots" aria-label="Progress">
+        <li title="Explain">Samjhao</li><li title="Question 1">1</li><li title="Question 2">2</li>
+        <li title="Question 3">3</li><li title="Result">⭐</li>
+      </ol>
       <div class="progress">
         <span id="step-label">Samjhao · Explain</span>
         <span id="timer" class="timer"></span>
@@ -121,7 +134,10 @@
 
     <!-- Results -->
     <section id="screen-results" class="screen" hidden>
-      <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
+      <div class="score-wrap">
+        <div id="celebrate" class="celebrate" hidden aria-hidden="true"><span>🎉</span><span>⭐</span><span>✨</span><span>🌟</span><span>🎊</span></div>
+        <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
+      </div>
       <p class="score-label">Samajh score · Understanding score</p>
       <div id="breakdown" class="breakdown">
         <div class="bar" data-key="correctness"><span>Sahi samajh · Correct ideas <small>40%</small></span><div class="track"><i></i></div><b></b></div>
@@ -143,6 +159,7 @@
   </main>
 
   <script src="/js/voice.js"></script>
+  <script src="/js/demo.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

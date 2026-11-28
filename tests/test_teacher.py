@@ -98,3 +98,16 @@ def test_sample_class():
         assert len(d["reteach"]) == 2
         for ch in d["chapters"]:
             assert ch["students"] > 0 and 0 <= ch["average"] <= 100
+
+
+def test_demo_session_never_joins_a_class_and_reports_targets():
+    with TestClient(app) as c:
+        code, key = new_class(c)
+        r = c.post("/api/session/start", json={"chapter_id": "photosynthesis", "demo": True,
+                                               "class_code": code, "student_name": "Judge"}).json()
+        sid = r["session_id"]
+        q = c.post(f"/api/session/{sid}/explain", json={"transcript": SOIL, "reason": "typed"}).json()
+        assert q["target_id"] == "food_from_soil"  # Demo mode picks its scripted answer from this
+        state = c.get(f"/api/session/{sid}").json()
+        assert state["demo"] is True and state["class_code"] is None
+        assert c.get(f"/api/class/{code}/dashboard", headers=key).json()["totals"]["sessions"] == 0

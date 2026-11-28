@@ -42,6 +42,7 @@ class StartBody(BaseModel):
     language: str = Field(default=DEFAULT_LANGUAGE, max_length=20)
     class_code: str | None = Field(default=None, max_length=6)
     student_name: str | None = Field(default=None, max_length=40)
+    demo: bool = False  # scripted Demo mode
 
 
 class TurnBody(BaseModel):
@@ -88,13 +89,15 @@ def start(body: StartBody) -> dict:
     chapter = _chapter(body.chapter_id)
     language = body.language if body.language in LANGUAGES else DEFAULT_LANGUAGE
     class_code, student_name = body.class_code or None, classes.clean_name(body.student_name) or None
+    if body.demo:  # demo sessions never count towards a class
+        class_code = student_name = None
     if class_code:
         if not db.get_class(class_code):
             raise HTTPException(404, "Unknown class code")
         if not student_name:
             raise HTTPException(422, "A name is needed to join a class")
     brain = get_brain()
-    state = engine.new_session(chapter, language, brain, student_name, class_code)
+    state = engine.new_session(chapter, language, brain, student_name, class_code, demo=body.demo)
     db.save_session(state)
     return {"session_id": state["id"], "chapter": public_chapter(chapter), "brain": brain.name,
             **engine.opening(chapter, state)}
