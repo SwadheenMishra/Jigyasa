@@ -37,7 +37,7 @@ Kyun-Kyun runs on its **offline brain** and the whole app works end to end.
 3. **Teacher view:** open **http://localhost:3000/teacher.html** → **Load sample class** for a filled
    dashboard, or **Create a class** and join it from the student app with the 6-digit code.
 
-### Optional: the AI brain
+### AI brain (optional but recommended)
 
 ```bash
 cp .env.example .env      # Windows: copy .env.example .env
@@ -86,7 +86,7 @@ and 3 common misconceptions, e.g. *"1/8 is bigger than 1/4"*, *"heavier things f
 
 ## Two brains, one interface
 
-| | Offline brain (default) | AI brain (optional) |
+| | Offline brain (default) | AI brain (optional but recommended) |
 |---|---|---|
 | Needs | nothing | `GEMINI_API_KEY` + internet |
 | How | per-chapter concepts, keyword lists in Roman + Devanagari, misconception trigger phrases, pre-written questions and hints | Google Gemini writes personalised questions, hints and feedback that quote the student |
@@ -166,7 +166,9 @@ the teacher link, sent as `X-Teacher-Key`; only its SHA-256 hash is stored.
 - Voices depend on the device. Chrome usually offers "Google हिन्दी"; on Windows you can also add a Hindi
   voice in *Settings → Time & language → Speech*. The 🔊 **Test voice** button shows which voice
   is used. If no suitable voice exists, text is always on screen.
-- Every screen also works by typing, so the app stays usable without a mic.
+- **Voice first, inclusive by design:** Jigyasa is built to be spoken to. A clearly labelled
+  **"Can't speak? Type instead"** option is there for students with a speech disability, and it opens
+  automatically when a browser or device can't use the microphone.
 
 ## Known limits (honest list)
 

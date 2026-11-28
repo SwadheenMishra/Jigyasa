@@ -5,21 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jigyasa — जिज्ञासा</title>
   <meta name="description" content="Explain a concept out loud to Kyun-Kyun, your curious little sibling.">
-  <meta name="theme-color" content="#fff8e7">
+  <meta name="theme-color" content="#fff8ee">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- Reusable icons (inline SVG: no image downloads) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-mic" viewBox="0 0 24 24">
+      <rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="currentColor"/>
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24">
+      <rect x="2.5" y="6" width="19" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M6 10h1M9 10h1M12 10h1M15 10h1M18 10h0M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+
   <header class="topbar">
-    <a class="brand" href="/">जिज्ञासा <small>Jigyasa</small></a>
+    <a class="brand" href="/" aria-label="Jigyasa home">
+      <img src="/favicon.svg" alt="" width="30" height="30">
+      <span>जिज्ञासा <small>Jigyasa</small></span>
+    </a>
     <span id="brain-badge" class="badge" title="Which brain Kyun-Kyun is using">…</span>
   </header>
 
   <main>
-    <!-- Filled by app.js: unsupported browser, no https, no TTS. -->
+    <!-- Notices (filled by app.js) -->
     <p id="voice-warning" class="notice" hidden></p>
     <p id="net-warning" class="notice" hidden>
-      📶 Internet nahi hai. Kyun-Kyun offline brain se chalega — bolne ki jagah neeche likho. · No internet: type your answers below.
+      📶 Internet nahi hai — Kyun-Kyun offline brain se chalega. · No internet: Kyun-Kyun keeps working offline.
     </p>
     <div id="demo-banner" class="demo-banner" hidden>
       <span id="demo-banner-text"></span>
@@ -32,12 +47,13 @@
 
     <!-- Kyun-Kyun: an original character, drawn in SVG. Moods: curious, listening, confused, happy. -->
     <section class="stage">
+      <div class="halo" aria-hidden="true"></div>
       <div id="kk" class="kk" data-mood="curious" aria-hidden="true">
-        <svg viewBox="0 0 160 160" width="150" height="150">
-          <ellipse cx="80" cy="152" rx="38" ry="5" fill="#2b2d42" opacity=".15"/>
+        <svg viewBox="0 0 160 160" width="136" height="136">
+          <ellipse cx="80" cy="152" rx="38" ry="5" fill="#2b2d42" opacity=".12"/>
           <g class="kk-body">
             <path d="M80 34 q2 -20 20 -16" stroke="#2b2d42" stroke-width="4" fill="none" stroke-linecap="round"/>
-            <circle cx="101" cy="18" r="5" fill="#ef476f"/>
+            <circle cx="101" cy="18" r="5" fill="#ff5c7a"/>
             <circle cx="80" cy="88" r="56" fill="#ffd166" stroke="#2b2d42" stroke-width="4"/>
             <circle cx="50" cy="102" r="8" fill="#ff9fb2" opacity=".7"/>
             <circle cx="110" cy="102" r="8" fill="#ff9fb2" opacity=".7"/>
@@ -55,8 +71,8 @@
             <path class="m m-happy" d="M62 104 q18 24 36 0 z" fill="#2b2d42"/>
             <path class="m m-confused" d="M64 114 q8 -7 16 0 t16 0" stroke="#2b2d42" stroke-width="4" fill="none" stroke-linecap="round"/>
           </g>
-          <text class="qmark" x="128" y="44" font-size="34" font-weight="800" fill="#ef476f">?</text>
-          <g class="waves" stroke="#118ab2" stroke-width="4" fill="none" stroke-linecap="round">
+          <text class="qmark" x="128" y="44" font-size="34" font-weight="800" fill="#ff5c7a">?</text>
+          <g class="waves" stroke="#2e9bd6" stroke-width="4" fill="none" stroke-linecap="round">
             <path d="M140 74 q8 14 0 28"/><path d="M150 66 q13 22 0 44"/>
           </g>
         </svg>
@@ -64,35 +80,50 @@
       <div id="bubble" class="bubble" aria-live="polite">Namaste! Main Kyun-Kyun hoon. Mujhe kuch sikhaoge?</div>
     </section>
 
-    <!-- Home: pick language, then say the topic or tap a chapter (max 2 taps to start). -->
+    <!-- HOME: language -> say the topic (or tap a chapter). Max 2 taps to start explaining. -->
     <section id="screen-home" class="screen">
       <div id="resume-card" class="resume" hidden>
         <p><strong>Pichla session jaari rakhein? · Continue your last session?</strong><br><span id="resume-text"></span></p>
         <div class="row">
           <button id="btn-resume" class="btn primary" type="button">▶ Jaari rakho · Continue</button>
-          <button id="btn-resume-new" class="btn" type="button">Naya shuru · Start new</button>
+          <button id="btn-resume-new" class="btn ghost" type="button">Naya shuru · Start new</button>
         </div>
       </div>
 
       <p class="tagline">You can copy an answer. You can't copy understanding.</p>
-      <button id="btn-demo" class="btn demo-btn" type="button">▶ Demo dekho · Watch a 90-second demo
-        <small>no mic or key needed</small></button>
 
-      <h2 class="label">Bhasha chuno · Pick your language</h2>
-      <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
+      <button id="btn-demo" class="demo-strip" type="button">
+        <span class="play" aria-hidden="true">▶</span>
+        <span><b>Demo dekho · Watch a 90-second demo</b><small>no mic or key needed</small></span>
+      </button>
 
-      <button id="btn-topic" class="mic" type="button" aria-label="Say the topic">🎤</button>
-      <p class="mic-label">Topic bolo · Say the topic<br><small>“Photosynthesis samjhana hai”</small></p>
-
-      <h2 class="label">Ya chapter chuno · Or pick a chapter</h2>
-      <div id="chapter-cards" class="cards"></div>
-
-      <!-- Optional: join a teacher's class once (6-digit code + first name). Solo use needs nothing. -->
-      <div class="join-row">
-        <span id="joined" hidden>🏫 <b id="joined-class"></b> · <span id="joined-name"></span>
-          <button id="btn-leave" class="link-btn" type="button">change</button></span>
-        <button id="btn-join" class="link-btn" type="button">🏫 Class join karo · Join a class (optional)</button>
+      <div class="block">
+        <h2 class="label">Bhasha chuno · Pick your language</h2>
+        <div id="lang-chips" class="chips" role="radiogroup" aria-label="Language"></div>
       </div>
+
+      <div class="mic-zone">
+        <button id="btn-topic" class="mic" type="button" aria-label="Tap and say the topic">
+          <svg width="56" height="56" aria-hidden="true"><use href="#i-mic"/></svg>
+        </button>
+        <p class="mic-label">Tap karke topic bolo · Tap &amp; say the topic
+          <small>“Photosynthesis samjhana hai”</small></p>
+      </div>
+
+      <div class="block">
+        <h2 class="label">Ya chapter chuno · Or pick a chapter</h2>
+        <div id="chapter-cards" class="cards"></div>
+      </div>
+
+      <!-- Small extras, grouped so they don't compete with the mic -->
+      <div class="tools">
+        <span id="joined" class="tool joined" hidden>🏫 <b id="joined-class"></b> · <span id="joined-name"></span>
+          <button id="btn-leave" class="link-btn" type="button">change</button></span>
+        <button id="btn-join" class="tool" type="button">🏫 Join a class <small>optional</small></button>
+        <button id="btn-voice-test" class="tool" type="button">🔊 Test voice</button>
+        <a class="tool" href="/teacher.html">👩‍🏫 Teacher</a>
+      </div>
+      <p id="voice-name" class="voice-name"></p>
       <form id="join-panel" class="join-panel" hidden autocomplete="off">
         <div class="row">
           <input id="join-code" inputmode="numeric" maxlength="6" placeholder="Class code (6 digits)" aria-label="Class code">
@@ -102,13 +133,9 @@
         <p class="muted-note">Only your first name and your scores are shared with your teacher.</p>
         <p id="join-error" class="join-error" hidden></p>
       </form>
-
-      <button id="btn-voice-test" class="btn small" type="button">🔊 Awaaz suno · Test voice</button>
-      <p id="voice-name" class="voice-name"></p>
-      <a class="teacher-link" href="/teacher.html">👩‍🏫 Teacher? Class dashboard →</a>
     </section>
 
-    <!-- Talk: explanation, then 3 follow-up questions. -->
+    <!-- TALK: explanation, then 3 follow-up questions. Voice is the main input. -->
     <section id="screen-talk" class="screen" hidden>
       <ol id="progress-dots" class="dots" aria-label="Progress">
         <li title="Explain">Samjhao</li><li title="Question 1">1</li><li title="Question 2">2</li>
@@ -119,30 +146,44 @@
         <span id="timer" class="timer"></span>
       </div>
       <div id="question-card" class="question" hidden></div>
-      <p id="mic-state" class="mic-state">🎤 Sun raha hoon · Listening…</p>
+
+      <div id="mic-state" class="listen">
+        <div class="orb" aria-hidden="true"><svg width="40" height="40"><use href="#i-mic"/></svg></div>
+        <p class="listen-on">Sun raha hoon… bolo! · Listening — speak!</p>
+        <p class="listen-off">Kyun-Kyun bol raha hai… · Kyun-Kyun is talking…</p>
+      </div>
       <div id="transcript" class="transcript" aria-live="polite"></div>
       <button id="btn-done" class="btn primary" type="button">✋ Ho gaya · Done</button>
 
-      <form id="text-form" class="text-form" autocomplete="off">
-        <label for="text-input">Likh kar batao · Or type it</label>
+      <!-- Accessibility: typing is for students who can't speak (speech disability),
+           and opens by itself when the device can't use the microphone. -->
+      <button id="btn-type" class="type-toggle" type="button" aria-expanded="false" aria-controls="text-form">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-keyboard"/></svg>
+        Bol nahi sakte? Likh kar batao · Can't speak? Type instead
+      </button>
+      <form id="text-form" class="text-form" autocomplete="off" hidden>
+        <p id="type-note" class="type-note">♿ For students with a speech disability — or when the mic isn't
+          available. Jigyasa is made for speaking, so use your voice if you can.</p>
         <div class="row">
-          <input id="text-input" type="text" maxlength="2000" placeholder="Yahan likho… · Type here…">
+          <input id="text-input" type="text" maxlength="2000" placeholder="Yahan likho… · Type here…" aria-label="Type your answer">
           <button class="btn" type="submit">Bhejo · Send</button>
         </div>
       </form>
     </section>
 
-    <!-- Results -->
+    <!-- RESULTS -->
     <section id="screen-results" class="screen" hidden>
-      <div class="score-wrap">
-        <div id="celebrate" class="celebrate" hidden aria-hidden="true"><span>🎉</span><span>⭐</span><span>✨</span><span>🌟</span><span>🎊</span></div>
-        <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
-      </div>
-      <p class="score-label">Samajh score · Understanding score</p>
-      <div id="breakdown" class="breakdown">
-        <div class="bar" data-key="correctness"><span>Sahi samajh · Correct ideas <small>40%</small></span><div class="track"><i></i></div><b></b></div>
-        <div class="bar" data-key="reasoning"><span>Kyun ka jawab · Reasoning <small>30%</small></span><div class="track"><i></i></div><b></b></div>
-        <div class="bar" data-key="coverage"><span>Concepts covered <small>30%</small></span><div class="track"><i></i></div><b></b></div>
+      <div class="result-card">
+        <div class="score-wrap">
+          <div id="celebrate" class="celebrate" hidden aria-hidden="true"><span>🎉</span><span>⭐</span><span>✨</span><span>🌟</span><span>🎊</span></div>
+          <div id="score-ring" class="score-ring"><span id="score">0</span><small>/100</small></div>
+        </div>
+        <p class="score-label">Samajh score · Understanding score</p>
+        <div id="breakdown" class="breakdown">
+          <div class="bar" data-key="correctness"><span>Sahi samajh · Correct ideas <small>40%</small></span><div class="track"><i></i></div><b></b></div>
+          <div class="bar" data-key="reasoning"><span>Kyun ka jawab · Reasoning <small>30%</small></span><div class="track"><i></i></div><b></b></div>
+          <div class="bar" data-key="coverage"><span>Concepts covered <small>30%</small></span><div class="track"><i></i></div><b></b></div>
+        </div>
       </div>
       <p id="feedback" class="feedback"></p>
       <div class="lists">
@@ -151,7 +192,7 @@
       </div>
       <div id="misconceptions"></div>
       <button id="btn-again" class="btn primary" type="button">🔁 Phir se samjhao · Explain again</button>
-      <button id="btn-home" class="btn" type="button">📚 Doosra chapter · Another chapter</button>
+      <button id="btn-home" class="btn ghost" type="button">📚 Doosra chapter · Another chapter</button>
     </section>
 
     <p class="privacy">🔒 Audio is never recorded or saved — only your words (text) and score. · आवाज़ कभी सेव नहीं होती।

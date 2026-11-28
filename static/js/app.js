@@ -114,12 +114,18 @@
 
   function show(screen) {
     for (const s of ["home", "talk", "results"]) $(`screen-${s}`).hidden = s !== screen;
+    document.body.dataset.screen = screen; // CSS makes Kyun-Kyun compact during a session
     window.scrollTo(0, 0);
   }
 
   function setMood(mood) { $("kk").dataset.mood = mood; }
   function bubble(text) { $("bubble").textContent = text; }
-  function micState(on) { $("mic-state").classList.toggle("on", on); }
+  /** Listening orb: "on" (listening), "talk" (Kyun-Kyun speaking) or "idle". */
+  function micState(on) {
+    const el = $("mic-state");
+    el.classList.toggle("on", on);
+    el.dataset.state = on ? "on" : "idle";
+  }
 
   /** Show and speak a line. `line` is {text, speak}; speak is Devanagari for Hinglish. */
   async function kkSay(line, mood = "curious") {
@@ -127,7 +133,13 @@
     bubble(line.text);
     micState(false);
     $("kk").classList.add("talking");
-    try { await V.speakLine(line, state.language); } finally { $("kk").classList.remove("talking"); }
+    $("mic-state").dataset.state = "talk";
+    try {
+      await V.speakLine(line, state.language);
+    } finally {
+      $("kk").classList.remove("talking");
+      if ($("mic-state").dataset.state === "talk") $("mic-state").dataset.state = "idle";
+    }
   }
 
   /** Progress dots: 0 = explain, 1-3 = questions, 4 = results. */
@@ -200,6 +212,19 @@
     }
   }
 
+  // ---------- typing: an accessibility option, not the main input ----------
+
+  /**
+   * Show or hide the text box. It is for students with a speech disability,
+   * and opens by itself when the device can't use the microphone.
+   */
+  function openTyping(open = true, focus = false) {
+    $("text-form").hidden = !open;
+    $("btn-type").setAttribute("aria-expanded", String(open));
+    $("btn-type").classList.toggle("open", open);
+    if (open && focus) $("text-input").focus();
+  }
+
   // ---------- voice problems ----------
 
   function handleVoiceError(err) {
@@ -208,7 +233,7 @@
     const msg = VOICE_ERRORS[err && err.code] || "Voice stopped working. Please type below. · नीचे लिखो।";
     $("voice-error-text").textContent = msg;
     $("voice-error").hidden = false;
-    $("text-input").focus();
+    openTyping(true, true);
   }
 
   /** "Retry voice": e.g. after allowing the mic or getting internet back. */
@@ -400,6 +425,7 @@
           continue;
         }
         console.error(err);
+        openTyping(true);
         $("text-input").value = turn.transcript; // keep their words: one tap on "Bhejo" resends
         await kkSay(uiLine("netFail"), "confused");
         continue;
@@ -590,6 +616,7 @@
       const b = document.createElement("button");
       b.type = "button";
       b.className = "card";
+      b.dataset.chapter = c.id; // per-chapter colour in CSS
       const emoji = document.createElement("span");
       emoji.className = "emoji";
       emoji.textContent = c.emoji;
@@ -629,6 +656,7 @@
     if (!V.canSpeak) warn.push("This browser can't speak, so read Kyun-Kyun's words on screen. · स्क्रीन पर पढ़ो।");
     $("voice-warning").textContent = warn.join(" ");
     $("voice-warning").hidden = !warn.length;
+    if (!V.canListen || !window.isSecureContext) openTyping(true);
 
     const net = () => { $("net-warning").hidden = navigator.onLine; };
     window.addEventListener("online", net);
@@ -642,6 +670,7 @@
     $("btn-done").addEventListener("click", onDone);
     $("text-form").addEventListener("submit", onTyped);
     $("btn-voice-retry").addEventListener("click", retryVoice);
+    $("btn-type").addEventListener("click", () => openTyping($("text-form").hidden, true));
     $("btn-demo").addEventListener("click", startDemo);
     $("btn-demo-stop").addEventListener("click", () => location.reload());
     $("btn-join").addEventListener("click", () => { $("join-panel").hidden = !$("join-panel").hidden; $("join-code").focus(); });

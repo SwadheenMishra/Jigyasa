@@ -210,4 +210,14 @@ def _session(session_id: str) -> dict:
 
 
 # Mounted last so /api routes take priority. html=True serves index.html at "/".
-app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+class RevalidatedStatic(StaticFiles):
+    """Static files that browsers must re-check (cheap 304 via ETag), so an
+    updated app is never shown with stale CSS/JS."""
+
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
+app.mount("/", RevalidatedStatic(directory=STATIC_DIR, html=True), name="static")
